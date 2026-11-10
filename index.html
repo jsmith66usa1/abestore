@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Video Asset Portal</title>
-    <!-- Tailwind CSS for sleek styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Compiled Tailwind CSS (no CDN JIT script, zero iframe thread-locking or console warnings) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
     <!-- Font Awesome for clean layout iconography -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -13,30 +13,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
     
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    },
-                    colors: {
-                        historyBlue: {
-                            900: '#0f172a',
-                            950: '#020617',
-                        },
-                        historyGold: {
-                            400: '#fbbf24',
-                            500: '#d97706',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
+        .font-serif {
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+        .bg-custom-card {
+            background-color: rgba(15, 23, 42, 0.6);
+        }
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -52,31 +40,31 @@
         }
     </style>
 </head>
-<body class="bg-historyBlue-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased">
+<body class="min-h-screen flex flex-col antialiased">
 
     <!-- Global Visual Error Popup Banner (Fixed Top-Center) -->
-    <div id="runtimePopupError" class="fixed top-5 left-1/2 -translate-x-1/2 max-w-lg w-[90%] bg-rose-950/95 border-2 border-rose-500 text-slate-100 p-4 rounded-xl shadow-2xl z-50 hidden backdrop-blur-md">
-        <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-full bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 flex-shrink-0 text-base">
+    <div id="runtimePopupError" class="fixed top-5 left-1/2 transform -translate-x-1/2 max-w-lg w-11/12 bg-red-950 border-2 border-red-500 text-slate-100 p-4 rounded-xl shadow-2xl z-50 hidden">
+        <div class="flex items-start">
+            <div class="w-8 h-8 rounded-full bg-red-900 border border-red-500 flex items-center justify-center text-red-300 flex-shrink-0 text-base mr-3">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div class="flex-grow">
-                <h3 class="text-sm font-bold text-rose-300" id="popupErrorTitle">Runtime Diagnostic Alert</h3>
+                <h3 class="text-sm font-bold text-red-300" id="popupErrorTitle">Runtime Diagnostic Alert</h3>
                 <p class="text-xs text-slate-300 font-mono mt-1 break-words leading-relaxed" id="popupErrorBody">
                     An error occurred while loading or executing the portal.
                 </p>
             </div>
-            <button onclick="dismissPopupError()" class="text-slate-400 hover:text-white p-1 text-sm flex-shrink-0">
-                <i class="fa-solid fa-xmark"></i>
+            <button onclick="dismissPopupError()" class="text-slate-400 hover:text-white p-1 text-sm flex-shrink-0 ml-2">
+                <i class="fa-solid fa-times"></i>
             </button>
         </div>
     </div>
 
-    <header class="border-b border-slate-800 bg-slate-950 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+    <header class="border-b border-gray-800 bg-black px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-historyGold-500/10 rounded-lg border border-historyGold-500/30 flex items-center justify-center">
-                    <i class="fa-solid fa-scroll text-historyGold-400 text-lg"></i>
+                <div class="w-10 h-10 bg-yellow-900 bg-opacity-20 rounded-lg border border-yellow-600 flex items-center justify-center">
+                    <i class="fa-solid fa-scroll text-yellow-400 text-lg"></i>
                 </div>
                 <div>
                     <h1 class="font-serif text-lg md:text-xl font-bold text-slate-100">
@@ -85,9 +73,9 @@
                     <p class="text-xs text-slate-400">Stream-optimized course videos (root directory layout)</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+            <div class="flex items-center mt-3 sm:mt-0">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-900 bg-opacity-30 text-green-400 border border-green-700">
+                    <span class="w-2 h-2 mr-2 bg-green-400 rounded-full animate-pulse"></span>
                     Direct Link Generator Active
                 </span>
             </div>
@@ -98,40 +86,39 @@
 
         <!-- Left Column: Primary Video Streamer (7 Columns) -->
         <section class="lg:col-span-7 flex flex-col gap-4">
-            <div class="bg-black rounded-xl overflow-hidden border border-slate-850 shadow-2xl relative flex flex-col">
-                <div class="aspect-video bg-slate-950 relative flex items-center justify-center">
+            <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
+                <div class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
                     
                     <video 
                         id="courseVideoPlayer" 
                         class="w-full h-full object-contain" 
                         controls 
                         playsinline 
-                        preload="metadata"
-                        onplay="handleVideoStarted()">
+                        preload="auto">
                         <source id="videoSource" src="" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                     
                     <!-- Loader Overlay -->
-                    <div id="playerLoadingCover" class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-20">
-                        <i class="fa-solid fa-circle-notch animate-spin text-historyGold-500 text-3xl"></i>
-                        <span id="loadingMessage" class="text-xs text-slate-300 font-mono">Streaming media source...</span>
+                    <div id="playerLoadingCover" class="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center gap-3 hidden z-20">
+                        <i class="fa-solid fa-circle-notch fa-spin text-yellow-500 text-3xl"></i>
+                        <span id="loadingMessage" class="text-xs text-slate-300 font-mono mt-2">Streaming media source...</span>
                     </div>
 
                     <!-- Explicit Error Overlay -->
-                    <div id="playerErrorCover" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center gap-3 hidden z-30">
-                        <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl">
+                    <div id="playerErrorCover" class="absolute inset-0 bg-black bg-opacity-95 flex flex-col items-center justify-center p-6 text-center gap-3 hidden z-30">
+                        <div class="w-12 h-12 rounded-full bg-red-900 border border-red-500 flex items-center justify-center text-red-400 text-xl mx-auto mb-2">
                             <i class="fa-solid fa-triangle-exclamation"></i>
                         </div>
                         <h4 class="font-serif text-sm font-semibold text-slate-200">Unable to Stream Video File</h4>
-                        <p id="playerErrorMessage" class="text-xs text-slate-400 max-w-md font-mono bg-slate-900 px-3 py-2 rounded border border-slate-800">
+                        <p id="playerErrorMessage" class="text-xs text-slate-400 max-w-md font-mono bg-gray-900 px-3 py-2 rounded border border-gray-800 my-2">
                             The media file could not be found or failed to load.
                         </p>
-                        <div class="flex items-center gap-3 mt-2">
-                            <button onclick="retryActiveVideo()" class="px-3 py-1.5 bg-historyGold-500/20 hover:bg-historyGold-500/30 text-historyGold-400 border border-historyGold-500/40 rounded text-xs transition-colors flex items-center gap-1.5">
-                                <i class="fa-solid fa-rotate-right"></i> Retry Loading
+                        <div class="flex items-center justify-center space-x-3 mt-2">
+                            <button onclick="retryActiveVideo()" class="px-3 py-1.5 bg-yellow-800 hover:bg-yellow-700 text-yellow-200 border border-yellow-600 rounded text-xs transition-colors flex items-center">
+                                <i class="fa-solid fa-rotate-right mr-1.5"></i> Retry Loading
                             </button>
-                            <button onclick="dismissErrorCover()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition-colors">
+                            <button onclick="dismissErrorCover()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-slate-300 rounded text-xs transition-colors">
                                 Dismiss
                             </button>
                         </div>
@@ -139,15 +126,15 @@
                 </div>
 
                 <!-- Media Info Bar -->
-                <div class="bg-slate-900/90 px-4 py-3 border-t border-slate-800/80 flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-xs">
-                    <div class="flex items-center gap-2">
-                        <span id="videoStatusIndicator" class="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
+                <div class="bg-gray-900 px-4 py-3 border-t border-gray-800 flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span id="videoStatusIndicator" class="w-2 h-2 bg-yellow-500 rounded-full"></span>
                         <span class="text-slate-400">Active Video:</span>
                         <strong id="loadedTitle" class="text-slate-200 font-serif">Introduction</strong>
                     </div>
-                    <div class="text-[10px] bg-slate-950 px-2.5 py-1.5 rounded border border-slate-850 text-slate-400 font-mono flex items-center justify-between gap-2 overflow-hidden max-w-full">
-                        <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400">Loading...</span></span>
-                        <button onclick="copyLoadedPathToClipboard()" class="text-amber-400 hover:text-amber-300 ml-1 flex-shrink-0" title="Copy exact link">
+                    <div class="text-xs bg-black px-2.5 py-1.5 rounded border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-2 overflow-hidden max-w-full">
+                        <span class="truncate">Full Link: <span id="loadedPath" class="text-green-400">Loading...</span></span>
+                        <button onclick="copyLoadedPathToClipboard()" class="text-yellow-400 hover:text-yellow-300 ml-2 flex-shrink-0" title="Copy exact link">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
@@ -155,9 +142,9 @@
             </div>
 
             <!-- React Integration Sandbox Documentation -->
-            <div class="bg-slate-900/30 rounded-xl p-4 border border-slate-800">
-                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <i class="fa-solid fa-link text-historyGold-500"></i>
+            <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
+                    <i class="fa-solid fa-link text-yellow-500 mr-2"></i>
                     How to Load Videos inside your React App
                 </h3>
                 <p class="text-xs text-slate-400 leading-relaxed mb-3">
@@ -165,13 +152,13 @@
                 </p>
                 <div class="space-y-2">
                     <div>
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Method A: Query Parameters (Simplest)</span>
-                        <code id="methodACode" class="text-amber-400 font-mono block mt-1 bg-slate-950 p-2 rounded text-[11px] overflow-x-auto whitespace-nowrap">
+                        <span class="text-xs text-slate-400 uppercase font-semibold block">Method A: Query Parameters (Simplest)</span>
+                        <code id="methodACode" class="text-yellow-400 font-mono block mt-1 bg-black p-2 rounded text-xs overflow-x-auto whitespace-nowrap">
                             <iframe src="./index.html?file=chapter1.mp4" />
                         </code>
                     </div>
                     <div class="pt-1">
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Method B: Direct Source Usage in React Player</span>
+                        <span class="text-xs text-slate-400 uppercase font-semibold block">Method B: Direct Source Usage in React Player</span>
                         <p class="text-xs text-slate-400 mb-1">Copy any direct link below to stream straight into a React <code><video></code> tag!</p>
                     </div>
                 </div>
@@ -179,15 +166,15 @@
         </section>
 
         <!-- Right Column: Interactive Video Mapping Playlists (5 Columns) -->
-        <section class="lg:col-span-5 flex flex-col gap-5">
+        <section class="lg:col-span-5 flex flex-col space-y-5">
             
             <!-- Category 1: Chapters -->
-            <div class="bg-slate-900/40 rounded-xl p-4 border border-slate-800">
-                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800/45">
-                    <i class="fa-solid fa-graduation-cap text-historyGold-500 text-sm"></i>
+            <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
+                <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
+                    <i class="fa-solid fa-graduation-cap text-yellow-500 text-sm"></i>
                     <div>
                         <h2 class="font-serif text-sm font-bold text-slate-200">1. Core History Course Chapters</h2>
-                        <p class="text-[10px] text-slate-400">Primary curriculum chapters synced to historical chat states</p>
+                        <p class="text-xs text-slate-400">Primary curriculum chapters synced to historical chat states</p>
                     </div>
                 </div>
 
@@ -197,12 +184,12 @@
             </div>
 
             <!-- Category 2: Documentaries -->
-            <div class="bg-slate-900/40 rounded-xl p-4 border border-slate-800">
-                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800/45">
-                    <i class="fa-solid fa-clapperboard text-sky-400 text-sm"></i>
+            <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
+                <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
+                    <i class="fa-solid fa-clapperboard text-blue-400 text-sm"></i>
                     <div>
                         <h2 class="font-serif text-sm font-bold text-slate-200">2. Historical Documentaries</h2>
-                        <p class="text-[10px] text-slate-400">Supplementary media mapped dynamically from root folder</p>
+                        <p class="text-xs text-slate-400">Supplementary media mapped dynamically from root folder</p>
                     </div>
                 </div>
 
@@ -212,12 +199,12 @@
             </div>
 
             <!-- Category 3: Book App Chapters -->
-            <div class="bg-slate-900/40 rounded-xl p-4 border border-slate-800">
-                <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800/45">
-                    <i class="fa-solid fa-book-open text-emerald-400 text-sm"></i>
+            <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
+                <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
+                    <i class="fa-solid fa-book-open text-green-400 text-sm"></i>
                     <div>
                         <h2 class="font-serif text-sm font-bold text-slate-200">3. TenDayBook Masterclass</h2>
-                        <p class="text-[10px] text-slate-400">Book blueprint, authoring, and publishing guides</p>
+                        <p class="text-xs text-slate-400">Book blueprint, authoring, and publishing guides</p>
                     </div>
                 </div>
 
@@ -230,14 +217,14 @@
     </main>
 
     <!-- Mini Feedback Toast Indicator -->
-    <div id="copyToast" class="fixed bottom-4 right-4 bg-emerald-600 border border-emerald-500 text-white text-xs px-3 py-2 rounded-lg shadow-xl opacity-0 transition-opacity duration-200 pointer-events-none z-50 flex items-center gap-1.5">
-        <i class="fa-solid fa-check"></i> Direct path copied to clipboard!
+    <div id="copyToast" class="fixed bottom-4 right-4 bg-green-600 border border-green-500 text-white text-xs px-3 py-2 rounded-lg shadow-xl opacity-0 transition-opacity duration-200 pointer-events-none z-50 flex items-center">
+        <i class="fa-solid fa-check mr-2"></i> Direct path copied to clipboard!
     </div>
 
     <script>
         // Global error handlers to surface any hidden script crashes directly onto the screen
         window.onerror = function(msg, url, line) {
-            triggerPopupError("Uncaught JavaScript Error", `${msg} (Line: ${line})`);
+            triggerPopupError("Uncaught JavaScript Error", msg + " (Line: " + line + ")");
         };
 
         function triggerPopupError(title, detail) {
@@ -247,7 +234,7 @@
                 document.getElementById('popupErrorBody').innerText = detail;
                 popup.classList.remove('hidden');
             } else {
-                alert(`${title}: ${detail}`);
+                alert(title + ": " + detail);
             }
         }
 
@@ -275,7 +262,7 @@
             { id: 'doc5', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
         ];
 
-        // Book App Chapters
+        // Book App Chapters (Preserving your updated chapter ordering)
         const bookAppChapters = [
             {
                 id: 'chap1',
@@ -345,7 +332,7 @@
                 const targetFilePath = queryParams.get('file');
 
                 if (targetFilePath) {
-                    playVideoByPath(targetFilePath, true);
+                    playVideoByPath(targetFilePath, false);
                 } else {
                     playVideoByPath('introduction.mp4', false);
                 }
@@ -374,7 +361,7 @@
                 if (activeLoadTimer) clearTimeout(activeLoadTimer);
                 cover.classList.add('hidden');
                 dismissErrorCover();
-                statusPing.className = 'w-2 h-2 bg-emerald-500 rounded-full';
+                statusPing.className = 'w-2 h-2 bg-green-500 rounded-full';
             };
 
             player.addEventListener('canplay', clearLoadingState);
@@ -405,7 +392,7 @@
 
             cover.classList.add('hidden');
             errCover.classList.remove('hidden');
-            statusPing.className = 'w-2 h-2 bg-rose-500 rounded-full';
+            statusPing.className = 'w-2 h-2 bg-red-500 rounded-full';
 
             let diagnostic = 'Failed to load video.';
             if (errorObj) {
@@ -445,78 +432,77 @@
             const documentaryList = document.getElementById('documentariesContainer');
             const bookAppList = document.getElementById('bookChaptersContainer');
 
-            // POPUP ALERT: Explicit check for missing HTML containers
             if (!bookAppList) {
-                triggerPopupError("Missing Container Error", 'The HTML tag `<div id="bookChaptersContainer">` was not found in the DOM. Book app chapters cannot be rendered.');
+                triggerPopupError("Missing Container Error", 'The HTML tag `<div id="bookChaptersContainer">` was not found in the DOM.');
                 return;
             }
 
-            // 1. Render Course Chapters
+            // 1. Core Chapters
             if (chapterList) {
                 chapterList.innerHTML = coreChapters.map(item => `
-                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-historyGold-500 rounded-lg cursor-pointer transition-all duration-150">
+                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                         <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
-                            <div class="w-6 h-6 rounded bg-slate-950 flex items-center justify-center text-[10px] text-slate-500 group-hover:text-historyGold-500 border border-slate-850 flex-shrink-0">
-                                <i class="fa-solid fa-play text-[8px]"></i>
+                            <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0">
+                                <i class="fa-solid fa-play text-xs"></i>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="text-xs font-serif font-semibold text-slate-200 group-hover:text-slate-100 truncate">${item.label}</p>
-                                <p class="text-[9px] text-slate-500 font-mono truncate">${item.path}</p>
+                                <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
+                                <p class="text-xs text-slate-500 font-mono truncate">${item.path}</p>
                             </div>
                         </div>
-                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
+                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
                 `).join('');
             }
 
-            // 2. Render Documentaries
+            // 2. Documentaries
             if (documentaryList) {
                 documentaryList.innerHTML = documentaries.map(item => `
-                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-sky-500 rounded-lg cursor-pointer transition-all duration-150">
+                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                         <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
-                            <div class="w-6 h-6 rounded bg-slate-950 flex items-center justify-center text-[10px] text-sky-400 border border-slate-850 flex-shrink-0">
-                                <i class="fa-solid fa-film text-[8px]"></i>
+                            <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0">
+                                <i class="fa-solid fa-film text-xs"></i>
                             </div>
                             <div class="overflow-hidden">
-                                <p class="text-xs font-serif font-semibold text-slate-200 group-hover:text-slate-100 truncate">${item.label}</p>
-                                <p class="text-[9px] text-slate-500 font-mono truncate">${item.path}</p>
+                                <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
+                                <p class="text-xs text-slate-500 font-mono truncate">${item.path}</p>
                             </div>
                         </div>
-                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
+                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
                 `).join('');
             }
 
-            // 3. Render Book App Chapters
+            // 3. Book App Chapters
             bookAppList.innerHTML = bookAppChapters.map(item => `
-                <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500 rounded-lg cursor-pointer transition-all duration-150">
+                <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                     <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
-                        <div class="w-6 h-6 rounded bg-slate-950 flex items-center justify-center text-[10px] text-emerald-400 border border-slate-850 flex-shrink-0">
-                            <i class="fa-solid fa-book-open text-[8px]"></i>
+                        <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0">
+                            <i class="fa-solid fa-book-open text-xs"></i>
                         </div>
                         <div class="overflow-hidden">
-                            <p class="text-xs font-serif font-semibold text-slate-200 group-hover:text-slate-100 truncate">${item.label}</p>
-                            <p class="text-[9px] text-slate-500 font-mono truncate">${item.path}</p>
+                            <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
+                            <p class="text-xs text-slate-500 font-mono truncate">${item.path}</p>
                         </div>
                     </div>
-                    <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
+                    <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
                         <i class="fa-regular fa-copy"></i>
                     </button>
                 </div>
             `).join('');
         }
 
-        function playVideoByPath(path, triggerAutoPlay = true) {
+        function playVideoByPath(path, triggerAutoPlay = false) {
             const sanitizedPath = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
             const video = allMappedVideos.find(v => v.path === sanitizedPath);
             
             if (!video) {
-                console.warn('Requested video not found in registry:', sanitizedPath);
-                handleVideoLoadFailure({ code: 4, message: `Video "${sanitizedPath}" is not registered in video mapping lists.` });
+                console.warn('Requested video not found:', sanitizedPath);
+                handleVideoLoadFailure({ code: 4, message: `Video "${sanitizedPath}" is not registered.` });
                 return;
             }
 
@@ -524,20 +510,24 @@
             dismissErrorCover();
 
             document.querySelectorAll('[id^="item-"]').forEach(el => {
-                el.classList.remove('border-historyGold-500', 'border-sky-500', 'border-emerald-500', 'bg-slate-800/60');
+                el.style.borderColor = '#1f2937';
+                el.style.backgroundColor = '#111827';
             });
             const activeCard = document.getElementById(`item-${video.id}`);
             if (activeCard) {
-                let borderHighlight = 'border-sky-500';
+                let borderCol = '#60a5fa'; // Blue
                 if (video.id.startsWith('ch') || video.id === 'intro') {
-                    borderHighlight = 'border-historyGold-500';
+                    borderCol = '#f59e0b'; // Gold
                 } else if (video.id.startsWith('chap')) {
-                    borderHighlight = 'border-emerald-500';
+                    borderCol = '#34d399'; // Emerald
                 }
-                activeCard.classList.add(borderHighlight, 'bg-slate-800/60');
+                activeCard.style.borderColor = borderCol;
+                activeCard.style.backgroundColor = '#1f2937';
             }
 
-            const absoluteUrl = getBaseFolderUrl() + encodeURI(video.path);
+            const encodedFileName = encodeURIComponent(video.path).replace(/%2F/g, '/');
+            const absoluteUrl = getBaseFolderUrl() + encodedFileName;
+
             document.getElementById('loadedTitle').innerText = video.label;
             document.getElementById('loadedPath').innerText = absoluteUrl;
 
@@ -546,27 +536,33 @@
             const cover = document.getElementById('playerLoadingCover');
             const statusPing = document.getElementById('videoStatusIndicator');
 
-            statusPing.className = 'w-2 h-2 bg-amber-500 rounded-full animate-ping';
+            // Pause and clear playback before loading new resource
+            player.pause();
+            statusPing.className = 'w-2 h-2 bg-yellow-500 rounded-full animate-ping';
             document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
             cover.classList.remove('hidden');
 
             if (activeLoadTimer) clearTimeout(activeLoadTimer);
             activeLoadTimer = setTimeout(() => {
-                if (!player.readyState || player.readyState < 2) {
+                if (player.readyState < 2) {
                     handleVideoLoadFailure({ 
                         code: 2, 
-                        message: `Connection timed out while loading "${video.path}". Ensure the file exists and is served over HTTPS.` 
+                        message: `Connection timed out loading "${video.path}". Ensure the file is deployed and served over HTTPS.` 
                     });
                 }
             }, 10000);
 
-            source.src = encodeURI(video.path);
+            source.src = encodedFileName;
             player.load();
 
             if (triggerAutoPlay) {
-                player.play().catch(() => {
-                    console.log('Autoplay deferred by the browser environment.');
-                });
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.log('Autoplay deferred or blocked by browser policy:', err);
+                        cover.classList.add('hidden');
+                    });
+                }
             }
 
             dispatchPromptSync(video);
@@ -585,13 +581,14 @@
 
         function dispatchPromptSync(videoObj) {
             if (window.parent && window.parent !== window) {
+                const encodedFileName = encodeURIComponent(videoObj.path).replace(/%2F/g, '/');
                 window.parent.postMessage({
                     type: 'SYNC_CHAT',
                     payload: {
                         prompt: videoObj.prompt,
                         title: videoObj.label,
                         path: videoObj.path,
-                        absoluteUrl: getBaseFolderUrl() + encodeURI(videoObj.path)
+                        absoluteUrl: getBaseFolderUrl() + encodedFileName
                     }
                 }, '*');
             }
@@ -604,7 +601,8 @@
 
         function copyRawPath(event, path) {
             event.stopPropagation();
-            const absoluteUrl = getBaseFolderUrl() + encodeURI(path);
+            const encodedFileName = encodeURIComponent(path).replace(/%2F/g, '/');
+            const absoluteUrl = getBaseFolderUrl() + encodedFileName;
             executeClipboardAction(absoluteUrl);
         }
 
