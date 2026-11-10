@@ -77,9 +77,10 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
+                <!-- Toggle Button: Set to Show Video Player by default -->
                 <button onclick="togglePlayerVisibility()" id="playerToggleBtn" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 text-xs font-mono text-gray-300 flex items-center transition">
-                    <i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i>
-                    <span>Hide Video Player</span>
+                    <i class="fa-solid fa-video mr-1.5 text-green-400"></i>
+                    <span>Show Video Player</span>
                 </button>
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-900 bg-opacity-30 text-green-400 border border-green-700">
                     <span class="w-2 h-2 mr-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -91,11 +92,26 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- Top Split View: Video Streamer & Quick Selection Lists -->
+        <!-- ACTIVE LINK STATUS BANNER: Always visible even when video player is hidden -->
+        <div class="bg-gray-900 px-4 py-3 rounded-xl border border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between text-xs shadow-lg">
+            <div class="flex items-center space-x-2">
+                <span id="videoStatusIndicator" class="w-2.5 h-2.5 bg-yellow-500 rounded-full flex-shrink-0"></span>
+                <span class="text-slate-400">Selected Asset:</span>
+                <strong id="loadedTitle" class="text-slate-200 font-serif text-sm">Introduction</strong>
+            </div>
+            <div class="text-xs bg-black px-3 py-2 rounded-lg border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-3 overflow-hidden max-w-full">
+                <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400 font-medium">Loading...</span></span>
+                <button onclick="copyLoadedPathToClipboard()" class="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0 transition" title="Copy exact link">
+                    <i class="fa-regular fa-copy text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Top Split View: Video Streamer (HIDDEN BY DEFAULT) & Quick Selection Playlists -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Left Column: Video Streamer (Player is Optional / Collapsible) -->
-            <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4">
+            <!-- Left Column: Video Streamer (HIDDEN by default with 'hidden' class) -->
+            <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
                         
@@ -134,21 +150,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Media Info Bar -->
-                    <div class="bg-gray-900 px-4 py-3 border-t border-gray-800 flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-xs">
-                        <div class="flex items-center space-x-2">
-                            <span id="videoStatusIndicator" class="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                            <span class="text-slate-400">Active Video:</span>
-                            <strong id="loadedTitle" class="text-slate-200 font-serif">Introduction</strong>
-                        </div>
-                        <div class="text-xs bg-black px-2.5 py-1.5 rounded border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-2 overflow-hidden max-w-full">
-                            <span class="truncate">Full Link: <span id="loadedPath" class="text-green-400">Loading...</span></span>
-                            <button onclick="copyLoadedPathToClipboard()" class="text-yellow-400 hover:text-yellow-300 ml-2 flex-shrink-0" title="Copy exact link">
-                                <i class="fa-regular fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- React Integration Sandbox Documentation -->
@@ -175,8 +176,8 @@
                 </div>
             </section>
 
-            <!-- Right Column: Interactive Video Mapping Playlists (5 Columns) -->
-            <section id="sidebarSection" class="lg:col-span-5 flex flex-col space-y-5">
+            <!-- Right Column: Interactive Quick Selection Playlists (Expanded to Full Width by Default) -->
+            <section id="sidebarSection" class="lg:col-span-12 flex flex-col space-y-5">
                 
                 <!-- Category 1: Chapters -->
                 <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
@@ -188,7 +189,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-2" id="chaptersContainer">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="chaptersContainer">
                         <!-- Loaded dynamically via JavaScript -->
                     </div>
                 </div>
@@ -203,7 +204,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-2" id="documentariesContainer">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="documentariesContainer">
                         <!-- Loaded dynamically via JavaScript -->
                     </div>
                 </div>
@@ -218,7 +219,7 @@
                         </div>
                     </div>
 
-                    <div class="space-y-2" id="bookChaptersContainer">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="bookChaptersContainer">
                         <!-- Loaded dynamically via JavaScript -->
                     </div>
                 </div>
@@ -226,7 +227,7 @@
             </section>
         </div>
 
-        <!-- ALWAYS-ON ASSET DIRECTORY TABLE (Guaranteed to list all playable URLs) -->
+        <!-- ALWAYS-ON ASSET DIRECTORY TABLE: Complete link index with 1-click copy -->
         <section class="bg-custom-card rounded-xl p-5 border border-gray-800">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 mb-4 border-b border-gray-800 gap-2">
                 <div>
@@ -287,20 +288,31 @@
             if (popup) popup.classList.add('hidden');
         }
 
-        // Toggle Player Visibility for Optional Player Mode
+        // Toggle Player Visibility between Full Width List and Split Player View
         function togglePlayerVisibility() {
             const playerSection = document.getElementById('playerSection');
             const sidebarSection = document.getElementById('sidebarSection');
+            const chaptersContainer = document.getElementById('chaptersContainer');
+            const documentariesContainer = document.getElementById('documentariesContainer');
+            const bookChaptersContainer = document.getElementById('bookChaptersContainer');
             const btn = document.getElementById('playerToggleBtn');
             const isHidden = playerSection.classList.contains('hidden');
 
             if (isHidden) {
+                // Show player
                 playerSection.classList.remove('hidden');
                 sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
+                if (chaptersContainer) chaptersContainer.className = 'space-y-2';
+                if (documentariesContainer) documentariesContainer.className = 'space-y-2';
+                if (bookChaptersContainer) bookChaptersContainer.className = 'space-y-2';
                 btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
             } else {
+                // Hide player (default state)
                 playerSection.classList.add('hidden');
                 sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
+                if (chaptersContainer) chaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
+                if (documentariesContainer) documentariesContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
+                if (bookChaptersContainer) bookChaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
                 btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
             }
         }
@@ -324,7 +336,7 @@
             { id: 'doc5', category: 'Documentaries', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
         ];
 
-        // Book App Chapters (Pre-encoded paths for reliable web linking)
+        // Book App Chapters (URLs pre-encoded for paths containing spaces/special characters)
         const bookAppChapters = [
             {
                 id: 'chap1',
@@ -429,28 +441,32 @@
 
             const clearLoadingState = () => {
                 if (activeLoadTimer) clearTimeout(activeLoadTimer);
-                cover.classList.add('hidden');
+                if (cover) cover.classList.add('hidden');
                 dismissErrorCover();
-                if (statusPing) statusPing.className = 'w-2 h-2 bg-green-500 rounded-full';
+                if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0';
             };
 
-            player.addEventListener('canplay', clearLoadingState);
-            player.addEventListener('loadeddata', clearLoadingState);
-            player.addEventListener('playing', clearLoadingState);
-            player.addEventListener('play', handleVideoStarted);
+            if (player && source) {
+                player.addEventListener('canplay', clearLoadingState);
+                player.addEventListener('loadeddata', clearLoadingState);
+                player.addEventListener('playing', clearLoadingState);
+                player.addEventListener('play', handleVideoStarted);
 
-            player.addEventListener('waiting', () => {
-                cover.classList.remove('hidden');
-                document.getElementById('loadingMessage').innerText = 'Buffering media stream...';
-            });
+                player.addEventListener('waiting', () => {
+                    if (cover) {
+                        cover.classList.remove('hidden');
+                        document.getElementById('loadingMessage').innerText = 'Buffering media stream...';
+                    }
+                });
 
-            player.addEventListener('error', () => {
-                handleVideoLoadFailure(player.error);
-            });
+                player.addEventListener('error', () => {
+                    handleVideoLoadFailure(player.error);
+                });
 
-            source.addEventListener('error', () => {
-                handleVideoLoadFailure(player.error || { code: 4, message: 'Resource blocked by browser, not found (404), or network failure.' });
-            });
+                source.addEventListener('error', () => {
+                    handleVideoLoadFailure(player.error || { code: 4, message: 'Resource blocked by browser, not found (404), or network failure.' });
+                });
+            }
         }
 
         function handleVideoLoadFailure(errorObj) {
@@ -461,9 +477,9 @@
             const errMsg = document.getElementById('playerErrorMessage');
             const statusPing = document.getElementById('videoStatusIndicator');
 
-            cover.classList.add('hidden');
-            errCover.classList.remove('hidden');
-            if (statusPing) statusPing.className = 'w-2 h-2 bg-red-500 rounded-full';
+            if (cover) cover.classList.add('hidden');
+            if (errCover) errCover.classList.remove('hidden');
+            if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-rose-500 rounded-full flex-shrink-0';
 
             let diagnostic = 'Failed to load video.';
             if (errorObj) {
@@ -484,7 +500,7 @@
                         diagnostic = errorObj.message || 'Media connection dropped.';
                 }
             }
-            errMsg.innerText = diagnostic;
+            if (errMsg) errMsg.innerText = diagnostic;
         }
 
         function retryActiveVideo() {
@@ -494,7 +510,8 @@
         }
 
         function dismissErrorCover() {
-            document.getElementById('playerErrorCover').classList.add('hidden');
+            const errCover = document.getElementById('playerErrorCover');
+            if (errCover) errCover.classList.add('hidden');
         }
 
         function renderLists() {
@@ -512,10 +529,10 @@
                             </div>
                             <div class="overflow-hidden">
                                 <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                                <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
+                                <p class="text-[10px] text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
                             </div>
                         </div>
-                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
+                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0 transition" title="Copy URL">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
@@ -532,10 +549,10 @@
                             </div>
                             <div class="overflow-hidden">
                                 <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                                <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
+                                <p class="text-[10px] text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
                             </div>
                         </div>
-                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
+                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0 transition" title="Copy URL">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
@@ -552,10 +569,10 @@
                             </div>
                             <div class="overflow-hidden">
                                 <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                                <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
+                                <p class="text-[10px] text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
                             </div>
                         </div>
-                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
+                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0 transition" title="Copy URL">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
@@ -571,7 +588,7 @@
 
             if (!tableBody) return;
 
-            tableBody.innerHTML = allMappedVideos.map((item, index) => {
+            tableBody.innerHTML = allMappedVideos.map((item) => {
                 const encodedPath = encodeURI(decodeURI(item.path));
                 const absoluteUrl = getBaseFolderUrl() + encodedPath;
                 
@@ -637,6 +654,7 @@
             const encodedPath = encodeURI(decodeURI(video.path));
             const absoluteUrl = getBaseFolderUrl() + encodedPath;
 
+            // Update top link info bar regardless of player visibility
             const titleElem = document.getElementById('loadedTitle');
             const pathElem = document.getElementById('loadedPath');
             if (titleElem) titleElem.innerText = video.label;
@@ -649,7 +667,7 @@
 
             if (player && source) {
                 player.pause();
-                if (statusPing) statusPing.className = 'w-2 h-2 bg-yellow-500 rounded-full animate-ping';
+                if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-yellow-500 rounded-full animate-ping flex-shrink-0';
                 if (cover) {
                     document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
                     cover.classList.remove('hidden');
