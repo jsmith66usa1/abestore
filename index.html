@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Course Video Asset Portal & Directory</title>
-    <!-- Inline SVG Favicon to eliminate 404 console errors -->
+    <!-- Inline SVG Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📜</text></svg>">
     
     <!-- Compiled Tailwind CSS -->
@@ -28,7 +28,7 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
-    <!-- Global Diagnostic Alert -->
+    <!-- Global Diagnostic Alert Popup -->
     <div id="runtimePopupError" class="fixed top-5 left-1/2 transform -translate-x-1/2 max-w-lg w-11/12 bg-red-950 border-2 border-red-500 text-slate-100 p-4 rounded-xl shadow-2xl z-50 hidden">
         <div class="flex items-start">
             <div class="w-8 h-8 rounded-full bg-red-900 border border-red-500 flex items-center justify-center text-red-300 flex-shrink-0 text-base mr-3">
@@ -38,12 +38,13 @@
                 <h3 class="text-sm font-bold text-red-300" id="popupErrorTitle">Diagnostic Alert</h3>
                 <p class="text-xs text-slate-300 font-mono mt-1 break-words leading-relaxed" id="popupErrorBody">Notice</p>
             </div>
-            <button onclick="document.getElementById('runtimePopupError').classList.add('hidden')" class="text-slate-400 hover:text-white p-1 text-sm flex-shrink-0 ml-2">
+            <button id="dismissAlertBtn" class="text-slate-400 hover:text-white p-1 text-sm flex-shrink-0 ml-2">
                 <i class="fa-solid fa-times"></i>
             </button>
         </div>
     </div>
 
+    <!-- Header Navigation -->
     <header class="border-b border-gray-800 bg-black px-6 py-4">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
@@ -72,7 +73,7 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- ACTIVE LINK STATUS BANNER -->
+        <!-- ACTIVE LINK STATUS BANNER: Instant absolute URL display and 1-click copy -->
         <div class="bg-gray-900 px-4 py-3 rounded-xl border border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between text-xs shadow-lg">
             <div class="flex items-center space-x-2">
                 <span id="videoStatusIndicator" class="w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0"></span>
@@ -81,17 +82,16 @@
             </div>
             <div class="text-xs bg-black px-3 py-2 rounded-lg border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-3 overflow-hidden max-w-full">
                 <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400 font-medium">Ready</span></span>
-                <!-- Button bound cleanly via ID without inline onclick -->
                 <button id="btnCopyLoaded" class="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0 transition" title="Copy exact link">
                     <i class="fa-regular fa-copy text-sm"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Top Split View: Video Streamer & Lists -->
+        <!-- Top Split View: Video Streamer & Quick Selection Lists -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Video Player (Hidden by default; No MP4 loaded until clicked) -->
+            <!-- Video Player (Hidden by default; No MP4 loaded until explicitly unhidden) -->
             <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div id="videoMountContainer" class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
@@ -101,14 +101,14 @@
                     </div>
                 </div>
 
-                <!-- React Integration Instructions -->
+                <!-- React Integration Sandbox Documentation -->
                 <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
                     <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
                         <i class="fa-solid fa-link text-yellow-500 mr-2"></i>
                         How to Load Videos inside your React App
                     </h3>
                     <p class="text-xs text-slate-400 leading-relaxed mb-3">
-                        Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>)[cite: 3].
+                        Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>).
                     </p>
                     <div class="space-y-2">
                         <div>
@@ -205,10 +205,9 @@
         <i class="fa-solid fa-check mr-2"></i> Direct path copied to clipboard!
     </div>
 
+    <!-- MAIN ENGINE SCRIPT -->
     <script>
-        // ==========================================
-        // 1. DATASET
-        // ==========================================
+        // --- 1. DATASET DEFINITIONS ---
         var coreChapters = [
             { id: 'intro', category: 'Core History', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
             { id: 'ch1', category: 'Core History', label: 'Chapter 1: The Gathering Storm', path: 'chapter1.mp4', prompt: 'Start at Chapter 1: The Gathering Storm' },
@@ -239,9 +238,7 @@
         var activeVideoAttempt = coreChapters[0];
         var activeLoadTimer = null;
 
-        // ==========================================
-        // 2. CLIPBOARD & UTILITY
-        // ==========================================
+        // --- 2. CLIPBOARD & UTILITY FUNCTIONS ---
         function getBaseFolderUrl() {
             var url = window.location.href.split('?')[0].split('#')[0];
             return url.substring(0, url.lastIndexOf('/')) + '/';
@@ -279,12 +276,14 @@
             }
         }
 
-        // ==========================================
-        // 3. EVENT LISTENERS (NO INLINE ONCLICK)
-        // ==========================================
+        // --- 3. EVENT DELEGATION & UI CONTROLS ---
         document.getElementById('btnCopyLoaded').addEventListener('click', function() {
             var p = document.getElementById('loadedPath');
             if (p && p.innerText) copyText(p.innerText);
+        });
+
+        document.getElementById('dismissAlertBtn').addEventListener('click', function() {
+            document.getElementById('runtimePopupError').classList.add('hidden');
         });
 
         document.getElementById('playerToggleBtn').addEventListener('click', togglePlayerVisibility);
@@ -343,9 +342,7 @@
             if (!isPlayerVisible()) togglePlayerVisibility();
         }
 
-        // ==========================================
-        // 4. RENDERING LISTS & DIRECTORY
-        // ==========================================
+        // --- 4. LIST & DIRECTORY RENDERING ---
         function renderLists() {
             var c1 = document.getElementById('chaptersContainer');
             var c2 = document.getElementById('documentariesContainer');
@@ -398,7 +395,7 @@
             }).join('');
         }
 
-        // Global Event Delegation: Intercepts all clicks reliably
+        // Global Click Delegator (captures card selection, card copy, table play, table copy)
         document.body.addEventListener('click', function(e) {
             var copyBtn = e.target.closest('[data-copy]');
             if (copyBtn) {
@@ -425,9 +422,7 @@
             }
         });
 
-        // ==========================================
-        // 5. SELECTION & PLAYBACK LOGIC
-        // ==========================================
+        // --- 5. SELECTION & STREAMING LOGIC ---
         function playVideoByPath(path, triggerAutoPlay) {
             var raw = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
             var video = null;
@@ -527,17 +522,14 @@
             }
         }
 
-        // ==========================================
-        // 6. IMMEDIATE INITIALIZATION
-        // ==========================================
+        // --- 6. SYNCHRONOUS INITIALIZATION ---
         renderLists();
         renderMasterDirectory();
 
-        // Immediately resolve the first URL synchronously
         var initialAbs = getBaseFolderUrl() + encodeURI(decodeURI(coreChapters[0].path));
         document.getElementById('loadedPath').innerText = initialAbs;
 
-        // PostMessage API for Abe
+        // Remote postMessage listener for Abe
         window.addEventListener('message', function(event) {
             var command = event.data;
             if (!command) return;
