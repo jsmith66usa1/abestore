@@ -151,7 +151,7 @@
                     How to Load Videos inside your React App
                 </h3>
                 <p class="text-xs text-slate-400 leading-relaxed mb-3">
-                    Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths.
+                    Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>).
                 </p>
                 <div class="space-y-2">
                     <div>
@@ -265,42 +265,42 @@
             { id: 'doc5', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
         ];
 
-        // Book App Chapters
+        // Book App Chapters (URLs pre-encoded for paths containing spaces/special characters)
         const bookAppChapters = [
             {
                 id: 'chap1',
                 label: 'Overview',
-                path: 'The Ten-Day Book Sprint.mp4',
+                path: 'The%20Ten-Day%20Book%20Sprint.mp4',
                 prompt: 'The Ten-Day Book Sprint'
             },
             {
                 id: 'chap2',
                 label: 'Outline',
-                path: 'The 10-Day Book Blueprint.mp4',
+                path: 'The%2010-Day%20Book%20Blueprint.mp4',
                 prompt: 'The 10-Day Book Blueprint'
             },
             {
                 id: 'chap3',
                 label: 'Draft Your Book',
-                path: 'Draft Your Book - TenDayBook App (1).mp4',
+                path: 'Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4',
                 prompt: 'Draft Your Book - TenDayBook App'
             },
             {
                 id: 'chap4',
                 label: 'Proof Read',
-                path: 'Chapter 4_ Proof Read and Review.mp4',
+                path: 'Chapter%204_%20Proof%20Read%20and%20Review.mp4',
                 prompt: 'Chapter 4: Proof Read and Review'
             },
             {
                 id: 'chap5',
                 label: 'End Matters',
-                path: 'TenDayBook Masterclass - Chapter 5_ End Matters.mp4',
+                path: 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4',
                 prompt: 'TenDayBook Masterclass - Chapter 5: End Matters'
             },
             {
                 id: 'chap6',
                 label: 'Publish',
-                path: 'Day 10 - KDP Export & Publishing Guide.mp4',
+                path: 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4',
                 prompt: 'Day 10 - KDP Export & Publishing Guide'
             }
         ];
@@ -451,7 +451,7 @@
                             </div>
                             <div class="overflow-hidden">
                                 <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                                <p class="text-xs text-slate-500 font-mono truncate">${item.path}</p>
+                                <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
                             </div>
                         </div>
                         <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
@@ -471,7 +471,7 @@
                             </div>
                             <div class="overflow-hidden">
                                 <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                                <p class="text-xs text-slate-500 font-mono truncate">${item.path}</p>
+                                <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
                             </div>
                         </div>
                         <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
@@ -490,7 +490,7 @@
                         </div>
                         <div class="overflow-hidden">
                             <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                            <p class="text-xs text-slate-500 font-mono truncate">${item.path}</p>
+                            <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
                         </div>
                     </div>
                     <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
@@ -501,12 +501,12 @@
         }
 
         function playVideoByPath(path, triggerAutoPlay = false) {
-            const sanitizedPath = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
-            const video = allMappedVideos.find(v => v.path === sanitizedPath);
+            const rawDecoded = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
+            const video = allMappedVideos.find(v => decodeURIComponent(v.path) === rawDecoded || v.path === path);
             
             if (!video) {
-                console.warn('Requested video not found:', sanitizedPath);
-                handleVideoLoadFailure({ code: 4, message: `Video "${sanitizedPath}" is not registered.` });
+                console.warn('Requested video not found:', path);
+                handleVideoLoadFailure({ code: 4, message: `Video "${path}" is not registered.` });
                 return;
             }
 
@@ -529,8 +529,9 @@
                 activeCard.style.backgroundColor = '#1f2937';
             }
 
-            const encodedFileName = encodeURIComponent(video.path).replace(/%2F/g, '/');
-            const absoluteUrl = getBaseFolderUrl() + encodedFileName;
+            // Path is already safely percent-encoded for URL streaming
+            const encodedPath = encodeURI(decodeURI(video.path));
+            const absoluteUrl = getBaseFolderUrl() + encodedPath;
 
             document.getElementById('loadedTitle').innerText = video.label;
             document.getElementById('loadedPath').innerText = absoluteUrl;
@@ -556,7 +557,7 @@
                 }
             }, 10000);
 
-            source.src = encodedFileName;
+            source.src = encodedPath;
             player.load();
 
             if (triggerAutoPlay) {
@@ -577,7 +578,7 @@
             const absoluteBase = getBaseFolderUrl();
             const relativePath = decodeURIComponent(currentPathElement.replace(absoluteBase, ''));
             
-            const currentVideo = allMappedVideos.find(v => v.path === relativePath);
+            const currentVideo = allMappedVideos.find(v => decodeURIComponent(v.path) === relativePath || v.path === relativePath);
             if (currentVideo) {
                 dispatchPromptSync(currentVideo);
             }
@@ -585,14 +586,14 @@
 
         function dispatchPromptSync(videoObj) {
             if (window.parent && window.parent !== window) {
-                const encodedFileName = encodeURIComponent(videoObj.path).replace(/%2F/g, '/');
+                const encodedPath = encodeURI(decodeURI(videoObj.path));
                 window.parent.postMessage({
                     type: 'SYNC_CHAT',
                     payload: {
                         prompt: videoObj.prompt,
                         title: videoObj.label,
                         path: videoObj.path,
-                        absoluteUrl: getBaseFolderUrl() + encodedFileName
+                        absoluteUrl: getBaseFolderUrl() + encodedPath
                     }
                 }, '*');
             }
@@ -605,8 +606,8 @@
 
         function copyRawPath(event, path) {
             event.stopPropagation();
-            const encodedFileName = encodeURIComponent(path).replace(/%2F/g, '/');
-            const absoluteUrl = getBaseFolderUrl() + encodedFileName;
+            const encodedPath = encodeURI(decodeURI(path));
+            const absoluteUrl = getBaseFolderUrl() + encodedPath;
             executeClipboardAction(absoluteUrl);
         }
 
@@ -633,4 +634,3 @@
     </script>
 </body>
 </html>
-
