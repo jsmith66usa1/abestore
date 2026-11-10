@@ -77,7 +77,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <!-- Toggle Button: Set to Show Video Player by default -->
+                <!-- Toggle Button: Hidden by default -->
                 <button onclick="togglePlayerVisibility()" id="playerToggleBtn" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 text-xs font-mono text-gray-300 flex items-center transition">
                     <i class="fa-solid fa-video mr-1.5 text-green-400"></i>
                     <span>Show Video Player</span>
@@ -110,7 +110,7 @@
         <!-- Top Split View: Video Streamer (HIDDEN BY DEFAULT) & Quick Selection Playlists -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Left Column: Video Streamer (HIDDEN by default with 'hidden' class; No MP4 loaded until revealed) -->
+            <!-- Left Column: Video Streamer (HIDDEN by default; No MP4 loaded until explicitly unhidden) -->
             <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
@@ -268,6 +268,69 @@
     </div>
 
     <script>
+        // ==========================================
+        // 1. CORE UTILITY & CLIPBOARD FUNCTIONS
+        // (Placed at top so onclick attributes never hit ReferenceError)
+        // ==========================================
+        function getBaseFolderUrl() {
+            const currentUrl = window.location.href.split('?')[0];
+            return currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/';
+        }
+
+        function executeClipboardAction(value) {
+            if (!value) return;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(value).then(showCopyToast).catch(() => fallbackClipboard(value));
+            } else {
+                fallbackClipboard(value);
+            }
+        }
+
+        function fallbackClipboard(value) {
+            const tempBox = document.createElement('textarea');
+            tempBox.value = value;
+            tempBox.style.position = 'fixed';
+            tempBox.style.left = '-9999px';
+            document.body.appendChild(tempBox);
+            tempBox.select();
+            try {
+                document.execCommand('copy');
+                showCopyToast();
+            } catch (err) {
+                console.error('Clipboard copy failed:', err);
+            }
+            document.body.removeChild(tempBox);
+        }
+
+        function showCopyToast() {
+            const toast = document.getElementById('copyToast');
+            if (toast) {
+                toast.classList.remove('opacity-0');
+                toast.classList.add('opacity-100');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    toast.classList.add('opacity-0');
+                }, 2000);
+            }
+        }
+
+        function copyLoadedPathToClipboard() {
+            const pathElem = document.getElementById('loadedPath');
+            if (pathElem && pathElem.innerText) {
+                executeClipboardAction(pathElem.innerText);
+            }
+        }
+
+        function copyRawPath(event, path) {
+            if (event) event.stopPropagation();
+            const encodedPath = encodeURI(decodeURI(path));
+            const absoluteUrl = getBaseFolderUrl() + encodedPath;
+            executeClipboardAction(absoluteUrl);
+        }
+
+        // ==========================================
+        // 2. DIAGNOSTICS & POPUP ALERTS
+        // ==========================================
         window.onerror = function(msg, url, line) {
             triggerPopupError("Uncaught JavaScript Error", msg + " (Line: " + line + ")");
         };
@@ -288,7 +351,9 @@
             if (popup) popup.classList.add('hidden');
         }
 
-        // Core History Course Chapters
+        // ==========================================
+        // 3. MASTER ASSET REGISTRY
+        // ==========================================
         const coreChapters = [
             { id: 'intro', category: 'Core History', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
             { id: 'ch1', category: 'Core History', label: 'Chapter 1: The Gathering Storm', path: 'chapter1.mp4', prompt: 'Start at Chapter 1: The Gathering Storm' },
@@ -298,7 +363,6 @@
             { id: 'ch5', category: 'Core History', label: 'Chapter 5: The Future', path: 'chapter5.mp4', prompt: 'Start at Chapter 5: The Future' }
         ];
 
-        // Historical Documentaries
         const documentaries = [
             { id: 'doc1', category: 'Documentaries', label: 'Autobiography', path: 'autobiography.mp4', prompt: 'Autobiography' },
             { id: 'doc2', category: 'Documentaries', label: 'Battle of Gettysburg', path: 'gettysburg.mp4', prompt: 'Battle of Gettysburg' },
@@ -307,7 +371,6 @@
             { id: 'doc5', category: 'Documentaries', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
         ];
 
-        // Book App Chapters (URLs pre-encoded for paths containing spaces/special characters)[cite: 3]
         const bookAppChapters = [
             {
                 id: 'chap1',
@@ -353,7 +416,6 @@
             }
         ];
 
-        // Master registry of all available videos
         const allMappedVideos = [
             ...coreChapters,
             ...documentaries,
@@ -363,18 +425,14 @@
         let activeVideoAttempt = null;
         let activeLoadTimer = null;
 
-        function getBaseFolderUrl() {
-            const currentUrl = window.location.href.split('?')[0];
-            return currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/';
-        }
-
-        // Check if player UI is currently visible
         function isPlayerVisible() {
             const playerSection = document.getElementById('playerSection');
             return playerSection && !playerSection.classList.contains('hidden');
         }
 
-        // Toggle Player Visibility: Unhiding loads the active video; Hiding pauses and halts MP4 stream
+        // ==========================================
+        // 4. TOGGLE PLAYER / NO-LOAD CONTROL
+        // ==========================================
         function togglePlayerVisibility() {
             const playerSection = document.getElementById('playerSection');
             const sidebarSection = document.getElementById('sidebarSection');
@@ -385,7 +443,7 @@
             const isHidden = playerSection.classList.contains('hidden');
 
             if (isHidden) {
-                // UNHIDE PLAYER: Reveal UI, shrink grid, and load/buffer the active video
+                // Show player
                 playerSection.classList.remove('hidden');
                 sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
                 if (chaptersContainer) chaptersContainer.className = 'space-y-2';
@@ -393,12 +451,12 @@
                 if (bookChaptersContainer) bookChaptersContainer.className = 'space-y-2';
                 btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
 
-                // Now load the active selected MP4 since player is visible
+                // Only now load and stream the MP4
                 if (activeVideoAttempt) {
                     loadAndStreamVideo(activeVideoAttempt, false);
                 }
             } else {
-                // HIDE PLAYER: Pause player, clear source to stop network transfer, expand list grid
+                // Hide player
                 playerSection.classList.add('hidden');
                 sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
                 if (chaptersContainer) chaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
@@ -406,12 +464,11 @@
                 if (bookChaptersContainer) bookChaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
                 btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
 
-                // Release media buffer and stop loading
+                // Immediately stop network buffer and detach source
                 haltVideoPlayer();
             }
         }
 
-        // Stops video playback and releases the network stream buffer
         function haltVideoPlayer() {
             const player = document.getElementById('courseVideoPlayer');
             const source = document.getElementById('videoSource');
@@ -422,11 +479,20 @@
                 player.pause();
                 if (source) source.src = '';
                 player.removeAttribute('src');
-                player.load(); // Resets network element
+                player.load(); // Resets network element to idle
             }
             if (cover) cover.classList.add('hidden');
         }
 
+        function revealPlayer() {
+            if (!isPlayerVisible()) {
+                togglePlayerVisibility();
+            }
+        }
+
+        // ==========================================
+        // 5. LIFECYCLE & INITIALIZATION
+        // ==========================================
         window.onload = function() {
             try {
                 attachVideoPlayerListeners();
@@ -442,7 +508,7 @@
                 const queryParams = new URLSearchParams(window.location.search);
                 const targetFilePath = queryParams.get('file');
 
-                // Initialize selection metadata & direct link without loading the MP4 file (player starts hidden)
+                // Initialize selection state without loading the MP4 file
                 if (targetFilePath) {
                     playVideoByPath(targetFilePath, false);
                 } else {
@@ -454,17 +520,16 @@
                     const command = event.data;
                     if (!command) return;
 
-                    // Abe requests to play/select a video
+                    // Remote play command from Abe
                     if (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH') {
                         const path = command.path || command.payload?.path;
                         if (path) {
-                            // If Abe sends a PLAY command, automatically reveal the player and play it
                             revealPlayer();
                             playVideoByPath(path, true);
                         }
                     }
 
-                    // Abe requests the full asset directory
+                    // Directory sync request from Abe
                     if (command.type === 'GET_ASSET_DIRECTORY') {
                         if (event.source) {
                             event.source.postMessage({
@@ -484,12 +549,6 @@
                 triggerPopupError("Initialization Error", err.message);
             }
         };
-
-        function revealPlayer() {
-            if (!isPlayerVisible()) {
-                togglePlayerVisibility();
-            }
-        }
 
         function attachVideoPlayerListeners() {
             const player = document.getElementById('courseVideoPlayer');
@@ -574,6 +633,9 @@
             if (errCover) errCover.classList.add('hidden');
         }
 
+        // ==========================================
+        // 6. UI RENDERING
+        // ==========================================
         function renderLists() {
             const chapterList = document.getElementById('chaptersContainer');
             const documentaryList = document.getElementById('documentariesContainer');
@@ -640,7 +702,6 @@
             }
         }
 
-        // Render the Complete Master Table of all links so external apps always have the full catalog
         function renderMasterDirectory() {
             const tableBody = document.getElementById('masterDirectoryTableBody');
             const assetCount = document.getElementById('assetCount');
@@ -681,18 +742,18 @@
             }).join('');
         }
 
-        // Clicking an asset updates metadata and active link, only loading MP4 if player is already visible
+        // ==========================================
+        // 7. SELECTION & PLAYBACK LOGIC
+        // ==========================================
         function handleAssetSelected(path) {
             playVideoByPath(path, isPlayerVisible());
         }
 
-        // Clicking 'Play' explicitly unhides the player and begins video playback
         function handlePlayFromDirectory(path) {
             revealPlayer();
             playVideoByPath(path, true);
         }
 
-        // Resolves video object, updates link UI, dispatches sync to Abe, and conditionally streams MP4
         function playVideoByPath(path, triggerAutoPlay = false) {
             const rawDecoded = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
             const video = allMappedVideos.find(v => decodeURIComponent(v.path) === rawDecoded || v.path === path);
@@ -705,18 +766,18 @@
             activeVideoAttempt = video;
             dismissErrorCover();
 
-            // Highlight active playlist item
+            // Highlight active item
             document.querySelectorAll('[id^="item-"]').forEach(el => {
                 el.style.borderColor = '#1f2937';
                 el.style.backgroundColor = '#111827';
             });
             const activeCard = document.getElementById(`item-${video.id}`);
             if (activeCard) {
-                let borderCol = '#60a5fa'; // Blue
+                let borderCol = '#60a5fa';
                 if (video.id.startsWith('ch') || video.id === 'intro') {
-                    borderCol = '#f59e0b'; // Gold
+                    borderCol = '#f59e0b';
                 } else if (video.id.startsWith('chap')) {
-                    borderCol = '#34d399'; // Emerald
+                    borderCol = '#34d399';
                 }
                 activeCard.style.borderColor = borderCol;
                 activeCard.style.backgroundColor = '#1f2937';
@@ -731,21 +792,19 @@
             if (titleElem) titleElem.innerText = video.label;
             if (pathElem) pathElem.innerText = absoluteUrl;
 
-            // ALWAYS dispatch prompt sync to Abe (regardless of whether player is visible or hidden)
+            // ALWAYS notify Abe
             dispatchPromptSync(video);
 
-            // ONLY load the MP4 over the network if the player is currently unhidden
+            // ONLY load the MP4 over network if the player is currently visible
             if (isPlayerVisible()) {
                 loadAndStreamVideo(video, triggerAutoPlay);
             } else {
-                // Keep player element completely detached from MP4 network streams
                 haltVideoPlayer();
                 const statusPing = document.getElementById('videoStatusIndicator');
                 if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-yellow-500 rounded-full flex-shrink-0';
             }
         }
 
-        // Executes actual MP4 loading on the video tag
         function loadAndStreamVideo(video, triggerAutoPlay = false) {
             const player = document.getElementById('courseVideoPlayer');
             const source = document.getElementById('videoSource');
@@ -801,7 +860,6 @@
             }
         }
 
-        // Cross-window sync to Abe via postMessage
         function dispatchPromptSync(videoObj) {
             if (window.parent && window.parent !== window) {
                 const encodedPath = encodeURI(decodeURI(videoObj.path));
@@ -815,41 +873,6 @@
                     }
                 }, '*');
             }
-        }
-
-        function copyLoadedPathToClipboard() {
-            const currentPath = document.getElementById('loadedPath').innerText;
-            executeClipboardAction(currentPath);
-        }
-
-        function copyRawPath(event, path) {
-            if (event) event.stopPropagation();
-            const encodedPath = encodeURI(decodeURI(path));
-            const absoluteUrl = getBaseFolderUrl() + encodedPath;
-            executeClipboardAction(absoluteUrl);
-        }
-
-        function executeClipboardAction(value) {
-            const tempBox = document.createElement('textarea');
-            tempBox.value = value;
-            document.body.appendChild(tempBox);
-            tempBox.select();
-            
-            try {
-                document.execCommand('copy');
-                const toast = document.getElementById('copyToast');
-                if (toast) {
-                    toast.classList.remove('opacity-0');
-                    toast.classList.add('opacity-100');
-                    setTimeout(() => {
-                        toast.classList.remove('opacity-100');
-                        toast.classList.add('opacity-0');
-                    }, 2000);
-                }
-            } catch (err) {
-                console.error('Fallback clipboard action failed', err);
-            }
-            document.body.removeChild(tempBox);
         }
     </script>
 </body>
