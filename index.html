@@ -64,159 +64,201 @@
     </div>
 
     <header class="border-b border-gray-800 bg-black px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-yellow-900 bg-opacity-20 rounded-lg border border-yellow-600 flex items-center justify-center">
                     <i class="fa-solid fa-scroll text-yellow-400 text-lg"></i>
                 </div>
                 <div>
                     <h1 class="font-serif text-lg md:text-xl font-bold text-slate-100">
-                        Lincoln Study Course Video Assets
+                        Course Video Asset Portal & Directory
                     </h1>
                     <p class="text-xs text-slate-400">Stream-optimized course videos (root directory layout)</p>
                 </div>
             </div>
-            <div class="flex items-center mt-3 sm:mt-0">
+            <div class="flex items-center space-x-3">
+                <button onclick="togglePlayerVisibility()" id="playerToggleBtn" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 text-xs font-mono text-gray-300 flex items-center transition">
+                    <i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i>
+                    <span>Hide Video Player</span>
+                </button>
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-900 bg-opacity-30 text-green-400 border border-green-700">
                     <span class="w-2 h-2 mr-2 bg-green-400 rounded-full animate-pulse"></span>
-                    Direct Link Generator Active
+                    Link Engine Active
                 </span>
             </div>
         </div>
     </header>
 
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- Left Column: Primary Video Streamer (7 Columns) -->
-        <section class="lg:col-span-7 flex flex-col gap-4">
-            <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
-                <div class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
-                    
-                    <video 
-                        id="courseVideoPlayer" 
-                        class="w-full h-full object-contain" 
-                        controls 
-                        playsinline 
-                        preload="auto">
-                        <source id="videoSource" src="" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                    
-                    <!-- Loader Overlay -->
-                    <div id="playerLoadingCover" class="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center gap-3 hidden z-20">
-                        <i class="fa-solid fa-circle-notch fa-spin text-yellow-500 text-3xl"></i>
-                        <span id="loadingMessage" class="text-xs text-slate-300 font-mono mt-2">Streaming media source...</span>
+        <!-- Top Split View: Video Streamer & Quick Selection Lists -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Left Column: Video Streamer (Player is Optional / Collapsible) -->
+            <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4">
+                <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
+                    <div class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
+                        
+                        <video 
+                            id="courseVideoPlayer" 
+                            class="w-full h-full object-contain" 
+                            controls 
+                            playsinline 
+                            preload="auto">
+                            <source id="videoSource" src="" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <!-- Loader Overlay -->
+                        <div id="playerLoadingCover" class="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center gap-3 hidden z-20">
+                            <i class="fa-solid fa-circle-notch fa-spin text-yellow-500 text-3xl"></i>
+                            <span id="loadingMessage" class="text-xs text-slate-300 font-mono mt-2">Streaming media source...</span>
+                        </div>
+
+                        <!-- Explicit Error Overlay -->
+                        <div id="playerErrorCover" class="absolute inset-0 bg-black bg-opacity-95 flex flex-col items-center justify-center p-6 text-center gap-3 hidden z-30">
+                            <div class="w-12 h-12 rounded-full bg-red-900 border border-red-500 flex items-center justify-center text-red-400 text-xl mx-auto mb-2">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <h4 class="font-serif text-sm font-semibold text-slate-200">Video Player Standby</h4>
+                            <p id="playerErrorMessage" class="text-xs text-slate-400 max-w-md font-mono bg-gray-900 px-3 py-2 rounded border border-gray-800 my-2">
+                                Select any video from the list or directory below to play.
+                            </p>
+                            <div class="flex items-center justify-center space-x-3 mt-2">
+                                <button onclick="retryActiveVideo()" class="px-3 py-1.5 bg-yellow-800 hover:bg-yellow-700 text-yellow-200 border border-yellow-600 rounded text-xs transition-colors flex items-center">
+                                    <i class="fa-solid fa-rotate-right mr-1.5"></i> Retry Loading
+                                </button>
+                                <button onclick="dismissErrorCover()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-slate-300 rounded text-xs transition-colors">
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Explicit Error Overlay -->
-                    <div id="playerErrorCover" class="absolute inset-0 bg-black bg-opacity-95 flex flex-col items-center justify-center p-6 text-center gap-3 hidden z-30">
-                        <div class="w-12 h-12 rounded-full bg-red-900 border border-red-500 flex items-center justify-center text-red-400 text-xl mx-auto mb-2">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
+                    <!-- Media Info Bar -->
+                    <div class="bg-gray-900 px-4 py-3 border-t border-gray-800 flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-xs">
+                        <div class="flex items-center space-x-2">
+                            <span id="videoStatusIndicator" class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                            <span class="text-slate-400">Active Video:</span>
+                            <strong id="loadedTitle" class="text-slate-200 font-serif">Introduction</strong>
                         </div>
-                        <h4 class="font-serif text-sm font-semibold text-slate-200">Unable to Stream Video File</h4>
-                        <p id="playerErrorMessage" class="text-xs text-slate-400 max-w-md font-mono bg-gray-900 px-3 py-2 rounded border border-gray-800 my-2">
-                            The media file could not be found or failed to load.
-                        </p>
-                        <div class="flex items-center justify-center space-x-3 mt-2">
-                            <button onclick="retryActiveVideo()" class="px-3 py-1.5 bg-yellow-800 hover:bg-yellow-700 text-yellow-200 border border-yellow-600 rounded text-xs transition-colors flex items-center">
-                                <i class="fa-solid fa-rotate-right mr-1.5"></i> Retry Loading
-                            </button>
-                            <button onclick="dismissErrorCover()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-slate-300 rounded text-xs transition-colors">
-                                Dismiss
+                        <div class="text-xs bg-black px-2.5 py-1.5 rounded border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-2 overflow-hidden max-w-full">
+                            <span class="truncate">Full Link: <span id="loadedPath" class="text-green-400">Loading...</span></span>
+                            <button onclick="copyLoadedPathToClipboard()" class="text-yellow-400 hover:text-yellow-300 ml-2 flex-shrink-0" title="Copy exact link">
+                                <i class="fa-regular fa-copy"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Media Info Bar -->
-                <div class="bg-gray-900 px-4 py-3 border-t border-gray-800 flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-xs">
-                    <div class="flex items-center space-x-2">
-                        <span id="videoStatusIndicator" class="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                        <span class="text-slate-400">Active Video:</span>
-                        <strong id="loadedTitle" class="text-slate-200 font-serif">Introduction</strong>
+                <!-- React Integration Sandbox Documentation -->
+                <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
+                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
+                        <i class="fa-solid fa-link text-yellow-500 mr-2"></i>
+                        How to Load Videos inside your React App
+                    </h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-3">
+                        Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>).
+                    </p>
+                    <div class="space-y-2">
+                        <div>
+                            <span class="text-xs text-slate-400 uppercase font-semibold block">Method A: Query Parameters (Simplest)</span>
+                            <code id="methodACode" class="text-yellow-400 font-mono block mt-1 bg-black p-2 rounded text-xs overflow-x-auto whitespace-nowrap">
+                                <iframe src="./index.html?file=chapter1.mp4" />
+                            </code>
+                        </div>
+                        <div class="pt-1">
+                            <span class="text-xs text-slate-400 uppercase font-semibold block">Method B: Direct Source Usage in React Player</span>
+                            <p class="text-xs text-slate-400 mb-1">Copy any direct link below to stream straight into a React <code><video></code> tag!</p>
+                        </div>
                     </div>
-                    <div class="text-xs bg-black px-2.5 py-1.5 rounded border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-2 overflow-hidden max-w-full">
-                        <span class="truncate">Full Link: <span id="loadedPath" class="text-green-400">Loading...</span></span>
-                        <button onclick="copyLoadedPathToClipboard()" class="text-yellow-400 hover:text-yellow-300 ml-2 flex-shrink-0" title="Copy exact link">
-                            <i class="fa-regular fa-copy"></i>
-                        </button>
+                </div>
+            </section>
+
+            <!-- Right Column: Interactive Video Mapping Playlists (5 Columns) -->
+            <section id="sidebarSection" class="lg:col-span-5 flex flex-col space-y-5">
+                
+                <!-- Category 1: Chapters -->
+                <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
+                    <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
+                        <i class="fa-solid fa-graduation-cap text-yellow-500 text-sm"></i>
+                        <div>
+                            <h2 class="font-serif text-sm font-bold text-slate-200">1. Core History Course Chapters</h2>
+                            <p class="text-xs text-slate-400">Primary curriculum chapters synced to historical chat states</p>
+                        </div>
                     </div>
+
+                    <div class="space-y-2" id="chaptersContainer">
+                        <!-- Loaded dynamically via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Category 2: Documentaries -->
+                <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
+                    <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
+                        <i class="fa-solid fa-clapperboard text-blue-400 text-sm"></i>
+                        <div>
+                            <h2 class="font-serif text-sm font-bold text-slate-200">2. Historical Documentaries</h2>
+                            <p class="text-xs text-slate-400">Supplementary media mapped dynamically from root folder</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2" id="documentariesContainer">
+                        <!-- Loaded dynamically via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Category 3: Book App Chapters -->
+                <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
+                    <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
+                        <i class="fa-solid fa-book-open text-green-400 text-sm"></i>
+                        <div>
+                            <h2 class="font-serif text-sm font-bold text-slate-200">3. TenDayBook Masterclass</h2>
+                            <p class="text-xs text-slate-400">Book blueprint, authoring, and publishing guides</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2" id="bookChaptersContainer">
+                        <!-- Loaded dynamically via JavaScript -->
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- ALWAYS-ON ASSET DIRECTORY TABLE (Guaranteed to list all playable URLs) -->
+        <section class="bg-custom-card rounded-xl p-5 border border-gray-800">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 mb-4 border-b border-gray-800 gap-2">
+                <div>
+                    <h2 class="font-serif text-base font-bold text-slate-100 flex items-center">
+                        <i class="fa-solid fa-list-check text-yellow-500 mr-2"></i>
+                        Master Video Asset Directory
+                    </h2>
+                    <p class="text-xs text-slate-400">Full catalog of direct media links ready for integration with Abe and external apps</p>
+                </div>
+                <div class="text-xs text-slate-400 font-mono bg-black px-3 py-1.5 rounded border border-gray-800">
+                    Total Assets: <span id="assetCount" class="text-yellow-400 font-bold">17</span>
                 </div>
             </div>
 
-            <!-- React Integration Sandbox Documentation -->
-            <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
-                    <i class="fa-solid fa-link text-yellow-500 mr-2"></i>
-                    How to Load Videos inside your React App
-                </h3>
-                <p class="text-xs text-slate-400 leading-relaxed mb-3">
-                    Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>).
-                </p>
-                <div class="space-y-2">
-                    <div>
-                        <span class="text-xs text-slate-400 uppercase font-semibold block">Method A: Query Parameters (Simplest)</span>
-                        <code id="methodACode" class="text-yellow-400 font-mono block mt-1 bg-black p-2 rounded text-xs overflow-x-auto whitespace-nowrap">
-                            <iframe src="./index.html?file=chapter1.mp4" />
-                        </code>
-                    </div>
-                    <div class="pt-1">
-                        <span class="text-xs text-slate-400 uppercase font-semibold block">Method B: Direct Source Usage in React Player</span>
-                        <p class="text-xs text-slate-400 mb-1">Copy any direct link below to stream straight into a React <code><video></code> tag!</p>
-                    </div>
-                </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs font-mono">
+                    <thead class="bg-black text-slate-400 border-b border-gray-800 uppercase text-[10px]">
+                        <tr>
+                            <th class="p-3">Section</th>
+                            <th class="p-3">Title / Label</th>
+                            <th class="p-3">File / Encoded Path</th>
+                            <th class="p-3">Prompt Trigger</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="masterDirectoryTableBody" class="divide-y divide-gray-800 text-slate-300">
+                        <!-- Populated dynamically on page load -->
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <!-- Right Column: Interactive Video Mapping Playlists (5 Columns) -->
-        <section class="lg:col-span-5 flex flex-col space-y-5">
-            
-            <!-- Category 1: Chapters -->
-            <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
-                <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
-                    <i class="fa-solid fa-graduation-cap text-yellow-500 text-sm"></i>
-                    <div>
-                        <h2 class="font-serif text-sm font-bold text-slate-200">1. Core History Course Chapters</h2>
-                        <p class="text-xs text-slate-400">Primary curriculum chapters synced to historical chat states</p>
-                    </div>
-                </div>
-
-                <div class="space-y-2" id="chaptersContainer">
-                    <!-- Loaded dynamically via JavaScript -->
-                </div>
-            </div>
-
-            <!-- Category 2: Documentaries -->
-            <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
-                <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
-                    <i class="fa-solid fa-clapperboard text-blue-400 text-sm"></i>
-                    <div>
-                        <h2 class="font-serif text-sm font-bold text-slate-200">2. Historical Documentaries</h2>
-                        <p class="text-xs text-slate-400">Supplementary media mapped dynamically from root folder</p>
-                    </div>
-                </div>
-
-                <div class="space-y-2" id="documentariesContainer">
-                    <!-- Loaded dynamically via JavaScript -->
-                </div>
-            </div>
-
-            <!-- Category 3: Book App Chapters -->
-            <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
-                <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
-                    <i class="fa-solid fa-book-open text-green-400 text-sm"></i>
-                    <div>
-                        <h2 class="font-serif text-sm font-bold text-slate-200">3. TenDayBook Masterclass</h2>
-                        <p class="text-xs text-slate-400">Book blueprint, authoring, and publishing guides</p>
-                    </div>
-                </div>
-
-                <div class="space-y-2" id="bookChaptersContainer">
-                    <!-- Loaded dynamically via JavaScript -->
-                </div>
-            </div>
-
-        </section>
     </main>
 
     <!-- Mini Feedback Toast Indicator -->
@@ -225,7 +267,6 @@
     </div>
 
     <script>
-        // Global error handlers to surface any hidden script crashes directly onto the screen
         window.onerror = function(msg, url, line) {
             triggerPopupError("Uncaught JavaScript Error", msg + " (Line: " + line + ")");
         };
@@ -246,66 +287,90 @@
             if (popup) popup.classList.add('hidden');
         }
 
+        // Toggle Player Visibility for Optional Player Mode
+        function togglePlayerVisibility() {
+            const playerSection = document.getElementById('playerSection');
+            const sidebarSection = document.getElementById('sidebarSection');
+            const btn = document.getElementById('playerToggleBtn');
+            const isHidden = playerSection.classList.contains('hidden');
+
+            if (isHidden) {
+                playerSection.classList.remove('hidden');
+                sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
+            } else {
+                playerSection.classList.add('hidden');
+                sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
+                btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
+            }
+        }
+
         // Core History Course Chapters
         const coreChapters = [
-            { id: 'intro', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
-            { id: 'ch1', label: 'Chapter 1: The Gathering Storm', path: 'chapter1.mp4', prompt: 'Start at Chapter 1: The Gathering Storm' },
-            { id: 'ch2', label: 'Chapter 2: The Spark & Early War', path: 'chapter2.mp4', prompt: 'Start at Chapter 2: The Spark & The Early War' },
-            { id: 'ch3', label: 'Chapter 3: The Turning Tide', path: 'chapter3.mp4', prompt: 'Start at Chapter 3: The Turning Tide' },
-            { id: 'ch4', label: 'Chapter 4: The Road to Victory', path: 'chapter4.mp4', prompt: 'Start at Chapter 4: The Road to Victory' },
-            { id: 'ch5', label: 'Chapter 5: The Future', path: 'chapter5.mp4', prompt: 'Start at Chapter 5: The Future' }
+            { id: 'intro', category: 'Core History', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
+            { id: 'ch1', category: 'Core History', label: 'Chapter 1: The Gathering Storm', path: 'chapter1.mp4', prompt: 'Start at Chapter 1: The Gathering Storm' },
+            { id: 'ch2', category: 'Core History', label: 'Chapter 2: The Spark & Early War', path: 'chapter2.mp4', prompt: 'Start at Chapter 2: The Spark & The Early War' },
+            { id: 'ch3', category: 'Core History', label: 'Chapter 3: The Turning Tide', path: 'chapter3.mp4', prompt: 'Start at Chapter 3: The Turning Tide' },
+            { id: 'ch4', category: 'Core History', label: 'Chapter 4: The Road to Victory', path: 'chapter4.mp4', prompt: 'Start at Chapter 4: The Road to Victory' },
+            { id: 'ch5', category: 'Core History', label: 'Chapter 5: The Future', path: 'chapter5.mp4', prompt: 'Start at Chapter 5: The Future' }
         ];
 
         // Historical Documentaries
         const documentaries = [
-            { id: 'doc1', label: 'Autobiography', path: 'autobiography.mp4', prompt: 'Autobiography' },
-            { id: 'doc2', label: 'Battle of Gettysburg', path: 'gettysburg.mp4', prompt: 'Battle of Gettysburg' },
-            { id: 'doc3', label: "Sherman's march to sea", path: 'sherman.mp4', prompt: "Sherman's march to sea" },
-            { id: 'doc4', label: 'Economics of the South', path: 'economicssouth.mp4', prompt: 'Economics of the South' },
-            { id: 'doc5', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
+            { id: 'doc1', category: 'Documentaries', label: 'Autobiography', path: 'autobiography.mp4', prompt: 'Autobiography' },
+            { id: 'doc2', category: 'Documentaries', label: 'Battle of Gettysburg', path: 'gettysburg.mp4', prompt: 'Battle of Gettysburg' },
+            { id: 'doc3', category: 'Documentaries', label: "Sherman's march to sea", path: 'sherman.mp4', prompt: "Sherman's march to sea" },
+            { id: 'doc4', category: 'Documentaries', label: 'Economics of the South', path: 'economicssouth.mp4', prompt: 'Economics of the South' },
+            { id: 'doc5', category: 'Documentaries', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
         ];
 
-        // Book App Chapters (URLs pre-encoded for paths containing spaces/special characters)
+        // Book App Chapters (Pre-encoded paths for reliable web linking)
         const bookAppChapters = [
             {
                 id: 'chap1',
+                category: 'TenDayBook',
                 label: 'Overview',
                 path: 'The%20Ten-Day%20Book%20Sprint.mp4',
                 prompt: 'The Ten-Day Book Sprint'
             },
             {
                 id: 'chap2',
+                category: 'TenDayBook',
                 label: 'Outline',
                 path: 'The%2010-Day%20Book%20Blueprint.mp4',
                 prompt: 'The 10-Day Book Blueprint'
             },
             {
                 id: 'chap3',
+                category: 'TenDayBook',
                 label: 'Draft Your Book',
                 path: 'Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4',
                 prompt: 'Draft Your Book - TenDayBook App'
             },
             {
                 id: 'chap4',
+                category: 'TenDayBook',
                 label: 'Proof Read',
                 path: 'Chapter%204_%20Proof%20Read%20and%20Review.mp4',
                 prompt: 'Chapter 4: Proof Read and Review'
             },
             {
                 id: 'chap5',
+                category: 'TenDayBook',
                 label: 'End Matters',
                 path: 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4',
                 prompt: 'TenDayBook Masterclass - Chapter 5: End Matters'
             },
             {
                 id: 'chap6',
+                category: 'TenDayBook',
                 label: 'Publish',
                 path: 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4',
                 prompt: 'Day 10 - KDP Export & Publishing Guide'
             }
         ];
 
-        // Combine into complete mapped video list
+        // Master registry of all available videos
         const allMappedVideos = [
             ...coreChapters,
             ...documentaries,
@@ -324,6 +389,7 @@
             try {
                 attachVideoPlayerListeners();
                 renderLists();
+                renderMasterDirectory();
 
                 const cleanUrl = window.location.href.split('?')[0];
                 const methodCode = document.getElementById('methodACode');
@@ -340,6 +406,7 @@
                     playVideoByPath('introduction.mp4', false);
                 }
 
+                // PostMessage listener so Abe can trigger any video remotely
                 window.addEventListener('message', function(event) {
                     const command = event.data;
                     if (command && (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH')) {
@@ -364,7 +431,7 @@
                 if (activeLoadTimer) clearTimeout(activeLoadTimer);
                 cover.classList.add('hidden');
                 dismissErrorCover();
-                statusPing.className = 'w-2 h-2 bg-green-500 rounded-full';
+                if (statusPing) statusPing.className = 'w-2 h-2 bg-green-500 rounded-full';
             };
 
             player.addEventListener('canplay', clearLoadingState);
@@ -396,7 +463,7 @@
 
             cover.classList.add('hidden');
             errCover.classList.remove('hidden');
-            statusPing.className = 'w-2 h-2 bg-red-500 rounded-full';
+            if (statusPing) statusPing.className = 'w-2 h-2 bg-red-500 rounded-full';
 
             let diagnostic = 'Failed to load video.';
             if (errorObj) {
@@ -418,7 +485,6 @@
                 }
             }
             errMsg.innerText = diagnostic;
-            triggerPopupError("Video Streaming Failed", diagnostic);
         }
 
         function retryActiveVideo() {
@@ -435,11 +501,6 @@
             const chapterList = document.getElementById('chaptersContainer');
             const documentaryList = document.getElementById('documentariesContainer');
             const bookAppList = document.getElementById('bookChaptersContainer');
-
-            if (!bookAppList) {
-                triggerPopupError("Missing Container Error", 'The HTML tag `<div id="bookChaptersContainer">` was not found in the DOM.');
-                return;
-            }
 
             // 1. Core Chapters
             if (chapterList) {
@@ -482,22 +543,65 @@
             }
 
             // 3. Book App Chapters
-            bookAppList.innerHTML = bookAppChapters.map(item => `
-                <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
-                    <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
-                        <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0">
-                            <i class="fa-solid fa-book-open text-xs"></i>
+            if (bookAppList) {
+                bookAppList.innerHTML = bookAppChapters.map(item => `
+                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                        <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                            <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0">
+                                <i class="fa-solid fa-book-open text-xs"></i>
+                            </div>
+                            <div class="overflow-hidden">
+                                <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
+                                <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
+                            </div>
                         </div>
-                        <div class="overflow-hidden">
-                            <p class="text-xs font-serif font-semibold text-slate-200 truncate">${item.label}</p>
-                            <p class="text-xs text-slate-500 font-mono truncate">${decodeURIComponent(item.path)}</p>
-                        </div>
+                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
                     </div>
-                    <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-500 hover:text-slate-300 p-1 text-xs flex-shrink-0" title="Copy URL">
-                        <i class="fa-regular fa-copy"></i>
-                    </button>
-                </div>
-            `).join('');
+                `).join('');
+            }
+        }
+
+        // Render the Complete Master Table of all links so external apps always have the full catalog
+        function renderMasterDirectory() {
+            const tableBody = document.getElementById('masterDirectoryTableBody');
+            const assetCount = document.getElementById('assetCount');
+            if (assetCount) assetCount.innerText = allMappedVideos.length;
+
+            if (!tableBody) return;
+
+            tableBody.innerHTML = allMappedVideos.map((item, index) => {
+                const encodedPath = encodeURI(decodeURI(item.path));
+                const absoluteUrl = getBaseFolderUrl() + encodedPath;
+                
+                let badgeColor = 'bg-yellow-900 text-yellow-300 border-yellow-700';
+                if (item.category === 'Documentaries') badgeColor = 'bg-blue-900 text-blue-300 border-blue-700';
+                if (item.category === 'TenDayBook') badgeColor = 'bg-green-900 text-green-300 border-green-700';
+
+                return `
+                    <tr class="hover:bg-gray-900/60 transition">
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] border ${badgeColor}">
+                                ${item.category}
+                            </span>
+                        </td>
+                        <td class="p-3 font-semibold text-slate-200">${item.label}</td>
+                        <td class="p-3 text-slate-400 truncate max-w-xs" title="${absoluteUrl}">
+                            <span class="text-emerald-400">${item.path}</span>
+                        </td>
+                        <td class="p-3 text-slate-400 font-mono text-[11px]">${item.prompt}</td>
+                        <td class="p-3 text-right whitespace-nowrap">
+                            <button onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition" title="Play Video in Player">
+                                <i class="fa-solid fa-play mr-1"></i> Play
+                            </button>
+                            <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition" title="Copy Full URL">
+                                <i class="fa-regular fa-copy mr-1"></i> Copy URL
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function playVideoByPath(path, triggerAutoPlay = false) {
@@ -506,13 +610,14 @@
             
             if (!video) {
                 console.warn('Requested video not found:', path);
-                handleVideoLoadFailure({ code: 4, message: `Video "${path}" is not registered.` });
+                handleVideoLoadFailure({ code: 4, message: `Video "${path}" is not registered in video registry.` });
                 return;
             }
 
             activeVideoAttempt = video;
             dismissErrorCover();
 
+            // Clear previous highlight
             document.querySelectorAll('[id^="item-"]').forEach(el => {
                 el.style.borderColor = '#1f2937';
                 el.style.backgroundColor = '#111827';
@@ -529,52 +634,60 @@
                 activeCard.style.backgroundColor = '#1f2937';
             }
 
-            // Path is already safely percent-encoded for URL streaming
             const encodedPath = encodeURI(decodeURI(video.path));
             const absoluteUrl = getBaseFolderUrl() + encodedPath;
 
-            document.getElementById('loadedTitle').innerText = video.label;
-            document.getElementById('loadedPath').innerText = absoluteUrl;
+            const titleElem = document.getElementById('loadedTitle');
+            const pathElem = document.getElementById('loadedPath');
+            if (titleElem) titleElem.innerText = video.label;
+            if (pathElem) pathElem.innerText = absoluteUrl;
 
             const player = document.getElementById('courseVideoPlayer');
             const source = document.getElementById('videoSource');
             const cover = document.getElementById('playerLoadingCover');
             const statusPing = document.getElementById('videoStatusIndicator');
 
-            // Pause and clear playback before loading new resource
-            player.pause();
-            statusPing.className = 'w-2 h-2 bg-yellow-500 rounded-full animate-ping';
-            document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
-            cover.classList.remove('hidden');
-
-            if (activeLoadTimer) clearTimeout(activeLoadTimer);
-            activeLoadTimer = setTimeout(() => {
-                if (player.readyState < 2) {
-                    handleVideoLoadFailure({ 
-                        code: 2, 
-                        message: `Connection timed out loading "${video.path}". Ensure the file is deployed and served over HTTPS.` 
-                    });
+            if (player && source) {
+                player.pause();
+                if (statusPing) statusPing.className = 'w-2 h-2 bg-yellow-500 rounded-full animate-ping';
+                if (cover) {
+                    document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
+                    cover.classList.remove('hidden');
                 }
-            }, 10000);
 
-            source.src = encodedPath;
-            player.load();
+                if (activeLoadTimer) clearTimeout(activeLoadTimer);
+                activeLoadTimer = setTimeout(() => {
+                    if (player.readyState < 2) {
+                        handleVideoLoadFailure({ 
+                            code: 2, 
+                            message: `Connection timed out loading "${video.path}". Ensure the file exists and is served over HTTPS.` 
+                        });
+                    }
+                }, 10000);
 
-            if (triggerAutoPlay) {
-                const playPromise = player.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(err => {
-                        console.log('Autoplay deferred or blocked by browser policy:', err);
-                        cover.classList.add('hidden');
-                    });
+                source.src = encodedPath;
+                player.load();
+
+                if (triggerAutoPlay) {
+                    const playPromise = player.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(err => {
+                            console.log('Autoplay deferred or blocked by browser policy:', err);
+                            if (cover) cover.classList.add('hidden');
+                        });
+                    }
                 }
             }
 
+            // Always notify external parents (Abe) regardless of player state
             dispatchPromptSync(video);
         }
 
         function handleVideoStarted() {
-            const currentPathElement = document.getElementById('loadedPath').innerText;
+            const pathElem = document.getElementById('loadedPath');
+            if (!pathElem) return;
+
+            const currentPathElement = pathElem.innerText;
             const absoluteBase = getBaseFolderUrl();
             const relativePath = decodeURIComponent(currentPathElement.replace(absoluteBase, ''));
             
@@ -605,7 +718,7 @@
         }
 
         function copyRawPath(event, path) {
-            event.stopPropagation();
+            if (event) event.stopPropagation();
             const encodedPath = encodeURI(decodeURI(path));
             const absoluteUrl = getBaseFolderUrl() + encodedPath;
             executeClipboardAction(absoluteUrl);
@@ -620,12 +733,14 @@
             try {
                 document.execCommand('copy');
                 const toast = document.getElementById('copyToast');
-                toast.classList.remove('opacity-0');
-                toast.classList.add('opacity-100');
-                setTimeout(() => {
-                    toast.classList.remove('opacity-100');
-                    toast.classList.add('opacity-0');
-                }, 2000);
+                if (toast) {
+                    toast.classList.remove('opacity-0');
+                    toast.classList.add('opacity-100');
+                    setTimeout(() => {
+                        toast.classList.remove('opacity-100');
+                        toast.classList.add('opacity-0');
+                    }, 2000);
+                }
             } catch (err) {
                 console.error('Fallback clipboard action failed', err);
             }
@@ -634,4 +749,3 @@
     </script>
 </body>
 </html>
-
