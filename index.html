@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Video Asset Portal</title>
+    <title>Lincoln Study - Video Asset Portal</title>
     <!-- Tailwind CSS for sleek styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome for clean layout iconography -->
@@ -70,7 +70,7 @@
             <div class="flex items-center gap-3">
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-1.5 h-1.5 mr-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                    HTTPS Stream Link Generator Active
+                    Direct Link Generator Active
                 </span>
             </div>
         </div>
@@ -97,35 +97,16 @@
                     </video>
                     
                     <!-- Loader Overlay -->
-                    <div id="playerLoadingCover" class="absolute inset-0 bg-slate-950/90 backdrop-blur-sm flex flex-col items-center justify-center gap-3 hidden z-20">
+                    <div id="playerLoadingCover" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center gap-3 hidden">
                         <i class="fa-solid fa-circle-notch animate-spin text-historyGold-500 text-3xl"></i>
-                        <span id="loadingMessage" class="text-xs text-slate-300 font-mono">Streaming media source...</span>
-                    </div>
-
-                    <!-- Explicit Error Overlay -->
-                    <div id="playerErrorCover" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center gap-3 hidden z-30">
-                        <div class="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                        <h4 class="font-serif text-sm font-semibold text-slate-200">Unable to Stream Video File</h4>
-                        <p id="playerErrorMessage" class="text-xs text-slate-400 max-w-md font-mono bg-slate-900 px-3 py-2 rounded border border-slate-800">
-                            The media file could not be found or failed to load.
-                        </p>
-                        <div class="flex items-center gap-3 mt-2">
-                            <button onclick="retryActiveVideo()" class="px-3 py-1.5 bg-historyGold-500/20 hover:bg-historyGold-500/30 text-historyGold-400 border border-historyGold-500/40 rounded text-xs transition-colors flex items-center gap-1.5">
-                                <i class="fa-solid fa-rotate-right"></i> Retry Loading
-                            </button>
-                            <button onclick="dismissErrorCover()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition-colors">
-                                Dismiss
-                            </button>
-                        </div>
+                        <span class="text-xs text-slate-400 font-mono">Streaming media source...</span>
                     </div>
                 </div>
 
                 <!-- Media Info Bar -->
                 <div class="bg-slate-900/90 px-4 py-3 border-t border-slate-800/80 flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-xs">
                     <div class="flex items-center gap-2">
-                        <span id="videoStatusIndicator" class="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
+                        <span class="w-2 h-2 bg-amber-500 rounded-full animate-ping"></span>
                         <span class="text-slate-400">Active Video:</span>
                         <strong id="loadedTitle" class="text-slate-200 font-serif">Introduction</strong>
                     </div>
@@ -145,13 +126,13 @@
                     How to Load Videos inside your React App
                 </h3>
                 <p class="text-xs text-slate-400 leading-relaxed mb-3">
-                    Always load the iframe over <strong>HTTPS</strong> or relative paths to prevent mixed-content blocks:
+                    Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths.
                 </p>
                 <div class="space-y-2">
                     <div>
-                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Method A: Query Parameters (HTTPS / Relative)</span>
+                        <span class="text-[10px] text-slate-400 uppercase font-semibold block">Method A: Query Parameters (Simplest)</span>
                         <code id="methodACode" class="text-amber-400 font-mono block mt-1 bg-slate-950 p-2 rounded text-[11px] overflow-x-auto whitespace-nowrap">
-                            <iframe src="./video_hub.html?file=chapter1.mp4" />
+                            <iframe src="http://your-server.com/video_hub.html?file=chapter1.mp4" />
                         </code>
                     </div>
                     <div class="pt-1">
@@ -219,7 +200,7 @@
     </div>
 
     <script>
-        // Core History Course Chapters
+        // Core History Course Chapters (Mapped to ROOT directory files)
         const coreChapters = [
             { id: 'intro', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
             { id: 'ch1', label: 'Chapter 1: The Gathering Storm', path: 'chapter1.mp4', prompt: 'Start at Chapter 1: The Gathering Storm' },
@@ -229,7 +210,7 @@
             { id: 'ch5', label: 'Chapter 5: The Future', path: 'chapter5.mp4', prompt: 'Start at Chapter 5: The Future' }
         ];
 
-        // Historical Documentaries
+        // Historical Documentaries (Mapped to ROOT directory files)
         const documentaries = [
             { id: 'doc1', label: 'Autobiography', path: 'autobiography.mp4', prompt: 'Autobiography' },
             { id: 'doc2', label: 'Battle of Gettysburg', path: 'gettysburg.mp4', prompt: 'Battle of Gettysburg' },
@@ -285,20 +266,17 @@
             ...bookAppChapters
         ];
 
-        let activeVideoAttempt = null;
-        let activeLoadTimer = null;
-
-        // Utility: Compute base directory dynamically so paths are strictly HTTPS
+        // Utility: Compute base directory dynamically so paths are instantly absolute copy-pasteable
         function getBaseFolderUrl() {
             const currentUrl = window.location.href.split('?')[0];
             return currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/';
         }
 
         window.onload = function() {
-            attachVideoPlayerListeners();
+            // Render interactive list view on page load
             renderLists();
 
-            // Populate Method A code helper block with current HTTPS URL
+            // Populate Method A code helper block with current server environment details
             const cleanUrl = window.location.href.split('?')[0];
             document.getElementById('methodACode').innerText = `<iframe src="${cleanUrl}?file=chapter1.mp4" />`;
 
@@ -309,6 +287,7 @@
             if (targetFilePath) {
                 playVideoByPath(targetFilePath, true);
             } else {
+                // Standby default video on load without auto-triggering play immediately
                 playVideoByPath('introduction.mp4', false);
             }
 
@@ -324,83 +303,6 @@
             });
         };
 
-        function attachVideoPlayerListeners() {
-            const player = document.getElementById('courseVideoPlayer');
-            const source = document.getElementById('videoSource');
-            const cover = document.getElementById('playerLoadingCover');
-            const statusPing = document.getElementById('videoStatusIndicator');
-
-            const clearLoadingState = () => {
-                if (activeLoadTimer) clearTimeout(activeLoadTimer);
-                cover.classList.add('hidden');
-                dismissErrorCover();
-                statusPing.className = 'w-2 h-2 bg-emerald-500 rounded-full';
-            };
-
-            player.addEventListener('canplay', clearLoadingState);
-            player.addEventListener('loadeddata', clearLoadingState);
-            player.addEventListener('playing', clearLoadingState);
-
-            player.addEventListener('waiting', () => {
-                cover.classList.remove('hidden');
-                document.getElementById('loadingMessage').innerText = 'Buffering media stream...';
-            });
-
-            // Error listener on HTML5 video element
-            player.addEventListener('error', () => {
-                handleVideoLoadFailure(player.error);
-            });
-
-            // Error listener on child <source> element (Catches 404s/network blocks)
-            source.addEventListener('error', () => {
-                handleVideoLoadFailure(player.error || { code: 4, message: 'Resource blocked by browser, not found (404), or network failure.' });
-            });
-        }
-
-        function handleVideoLoadFailure(errorObj) {
-            if (activeLoadTimer) clearTimeout(activeLoadTimer);
-
-            const cover = document.getElementById('playerLoadingCover');
-            const errCover = document.getElementById('playerErrorCover');
-            const errMsg = document.getElementById('playerErrorMessage');
-            const statusPing = document.getElementById('videoStatusIndicator');
-
-            cover.classList.add('hidden');
-            errCover.classList.remove('hidden');
-            statusPing.className = 'w-2 h-2 bg-rose-500 rounded-full';
-
-            let diagnostic = 'Failed to load video.';
-            if (errorObj) {
-                switch (errorObj.code) {
-                    case 1:
-                        diagnostic = 'Video playback aborted.';
-                        break;
-                    case 2:
-                        diagnostic = 'Network error or Mixed-Content block prevented loading.';
-                        break;
-                    case 3:
-                        diagnostic = 'Video decoding failed or format is unsupported.';
-                        break;
-                    case 4:
-                        diagnostic = `File not found (404) or blocked: "${activeVideoAttempt?.path || 'unknown'}"`;
-                        break;
-                    default:
-                        diagnostic = errorObj.message || 'Media connection dropped.';
-                }
-            }
-            errMsg.innerText = diagnostic;
-        }
-
-        function retryActiveVideo() {
-            if (activeVideoAttempt) {
-                playVideoByPath(activeVideoAttempt.path, true);
-            }
-        }
-
-        function dismissErrorCover() {
-            document.getElementById('playerErrorCover').classList.add('hidden');
-        }
-
         function renderLists() {
             const chapterList = document.getElementById('chaptersContainer');
             const documentaryList = document.getElementById('documentariesContainer');
@@ -408,7 +310,7 @@
 
             // 1. Render Course Chapters
             chapterList.innerHTML = coreChapters.map(item => `
-                <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-historyGold-500 rounded-lg cursor-pointer transition-all duration-150">
+                <div id="item-${item.id}" onclick="playVideoByPath('${item.path}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-historyGold-500 rounded-lg cursor-pointer transition-all duration-150">
                     <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                         <div class="w-6 h-6 rounded bg-slate-950 flex items-center justify-center text-[10px] text-slate-500 group-hover:text-historyGold-500 border border-slate-850 flex-shrink-0">
                             <i class="fa-solid fa-play text-[8px]"></i>
@@ -418,7 +320,7 @@
                             <p class="text-[9px] text-slate-500 font-mono truncate">${item.path}</p>
                         </div>
                     </div>
-                    <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
+                    <button onclick="copyRawPath(event, '${item.path}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
                         <i class="fa-regular fa-copy"></i>
                     </button>
                 </div>
@@ -426,7 +328,7 @@
 
             // 2. Render Documentaries
             documentaryList.innerHTML = documentaries.map(item => `
-                <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-sky-500 rounded-lg cursor-pointer transition-all duration-150">
+                <div id="item-${item.id}" onclick="playVideoByPath('${item.path}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-sky-500 rounded-lg cursor-pointer transition-all duration-150">
                     <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                         <div class="w-6 h-6 rounded bg-slate-950 flex items-center justify-center text-[10px] text-sky-400 border border-slate-850 flex-shrink-0">
                             <i class="fa-solid fa-film text-[8px]"></i>
@@ -436,7 +338,7 @@
                             <p class="text-[9px] text-slate-500 font-mono truncate">${item.path}</p>
                         </div>
                     </div>
-                    <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
+                    <button onclick="copyRawPath(event, '${item.path}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
                         <i class="fa-regular fa-copy"></i>
                     </button>
                 </div>
@@ -445,7 +347,7 @@
             // 3. Render Book App Chapters
             if (bookAppList) {
                 bookAppList.innerHTML = bookAppChapters.map(item => `
-                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500 rounded-lg cursor-pointer transition-all duration-150">
+                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path}', true)" class="group flex justify-between items-center p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500 rounded-lg cursor-pointer transition-all duration-150">
                         <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                             <div class="w-6 h-6 rounded bg-slate-950 flex items-center justify-center text-[10px] text-emerald-400 border border-slate-850 flex-shrink-0">
                                 <i class="fa-solid fa-book-open text-[8px]"></i>
@@ -455,7 +357,7 @@
                                 <p class="text-[9px] text-slate-500 font-mono truncate">${item.path}</p>
                             </div>
                         </div>
-                        <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
+                        <button onclick="copyRawPath(event, '${item.path}')" class="text-slate-600 hover:text-slate-300 p-1 text-[10px] transition-colors flex-shrink-0" title="Copy absolute url">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </div>
@@ -464,18 +366,12 @@
         }
 
         function playVideoByPath(path, triggerAutoPlay = true) {
+            // Support both relative or full path parsing
             const sanitizedPath = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
             const video = allMappedVideos.find(v => v.path === sanitizedPath);
-            
-            if (!video) {
-                console.warn('Requested video not found in registry:', sanitizedPath);
-                handleVideoLoadFailure({ code: 4, message: `Video "${sanitizedPath}" is not registered.` });
-                return;
-            }
+            if (!video) return;
 
-            activeVideoAttempt = video;
-            dismissErrorCover();
-
+            // Highlight corresponding active container
             document.querySelectorAll('[id^="item-"]').forEach(el => {
                 el.classList.remove('border-historyGold-500', 'border-sky-500', 'border-emerald-500', 'bg-slate-800/60');
             });
@@ -490,6 +386,7 @@
                 activeCard.classList.add(borderHighlight, 'bg-slate-800/60');
             }
 
+            // Expose absolute path labels dynamically
             const absoluteUrl = getBaseFolderUrl() + encodeURI(video.path);
             document.getElementById('loadedTitle').innerText = video.label;
             document.getElementById('loadedPath').innerText = absoluteUrl;
@@ -497,34 +394,26 @@
             const player = document.getElementById('courseVideoPlayer');
             const source = document.getElementById('videoSource');
             const cover = document.getElementById('playerLoadingCover');
-            const statusPing = document.getElementById('videoStatusIndicator');
 
-            statusPing.className = 'w-2 h-2 bg-amber-500 rounded-full animate-ping';
-            document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
+            // Apply direct src
             cover.classList.remove('hidden');
-
-            if (activeLoadTimer) clearTimeout(activeLoadTimer);
-            activeLoadTimer = setTimeout(() => {
-                if (!player.readyState || player.readyState < 2) {
-                    handleVideoLoadFailure({ 
-                        code: 2, 
-                        message: `Connection timed out while loading "${video.path}". Ensure the file exists and is served over HTTPS.` 
-                    });
-                }
-            }, 10000);
-
             source.src = encodeURI(video.path);
             player.load();
 
-            if (triggerAutoPlay) {
-                player.play().catch(() => {
-                    console.log('Autoplay deferred by the browser environment.');
-                });
-            }
+            player.oncanplay = function() {
+                cover.classList.add('hidden');
+                if (triggerAutoPlay) {
+                    player.play().catch(() => {
+                        console.log('Autoplay deferred by the sandbox environment.');
+                    });
+                }
+            };
 
+            // Notify parent React client immediately 
             dispatchPromptSync(video);
         }
 
+        // Event handler when video actively starts streaming
         function handleVideoStarted() {
             const currentPathElement = document.getElementById('loadedPath').innerText;
             const absoluteBase = getBaseFolderUrl();
@@ -536,6 +425,7 @@
             }
         }
 
+        // Send PostMessage notification back up to React application container
         function dispatchPromptSync(videoObj) {
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({
@@ -556,7 +446,7 @@
         }
 
         function copyRawPath(event, path) {
-            event.stopPropagation();
+            event.stopPropagation(); // Stop clicking row from reloading video stream
             const absoluteUrl = getBaseFolderUrl() + encodeURI(path);
             executeClipboardAction(absoluteUrl);
         }
