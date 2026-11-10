@@ -203,8 +203,52 @@
             { id: 'doc4', label: 'Economics of the South', path: 'economicssouth.mp4', prompt: 'Economics of the South' },
             { id: 'doc5', label: 'Economics of the North', path: 'economicsnoth.mp4', prompt: 'Economics of the North' }
         ];
+const bookAppChapters = [
+  {
+    id: 'chap1',
+    label: 'Overview',
+    path: 'The 10-Day Book Blueprint.mp4',
+    prompt: 'The 10-Day Book Blueprint'
+  },
+  {
+    id: 'chap2',
+    label: 'Outline',
+    path: 'The Ten-Day Book Sprint.mp4',
+    prompt: 'The Ten-Day Book Sprint'
+  },
+  {
+    id: 'chap3',
+    label: 'Draft Your Book',
+    path: 'Draft Your Book - TenDayBook App (1).mp4',
+    prompt: 'Draft Your Book - TenDayBook App'
+  },
+  {
+    id: 'chap4',
+    label: 'Proof Read',
+    path: 'Chapter 4_ Proof Read and Review.mp4',
+    prompt: 'Chapter 4: Proof Read and Review'
+  },
+  {
+    id: 'chap5',
+    label: 'End Matters',
+    path: 'TenDayBook Masterclass - Chapter 5_ End Matters.mp4',
+    prompt: 'TenDayBook Masterclass - Chapter 5: End Matters'
+  },
+  {
+    id: 'chap6',
+    label: 'Publish',
+    path: 'Day 10 - KDP Export & Publishing Guide.mp4',
+    prompt: 'Day 10 - KDP Export & Publishing Guide'
+  }
+];
 
-        const allMappedVideos = [...coreChapters, ...documentaries];
+// Combine into your mapped video list
+const allMappedVideos = [
+  ...coreChapters,
+  ...documentaries,
+  ...bookAppChapters
+];
+        
 
         // Utility: Compute base directory dynamically so paths are instantly absolute copy-pasteable
         function getBaseFolderUrl() {
