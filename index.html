@@ -370,6 +370,7 @@
             player.addEventListener('canplay', clearLoadingState);
             player.addEventListener('loadeddata', clearLoadingState);
             player.addEventListener('playing', clearLoadingState);
+            player.addEventListener('play', handleVideoStarted);
 
             player.addEventListener('waiting', () => {
                 cover.classList.remove('hidden');
