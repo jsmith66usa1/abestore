@@ -28,22 +28,6 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased">
 
-    <!-- Global Diagnostic Alert Popup -->
-    <div id="runtimePopupError" class="fixed top-5 left-1/2 transform -translate-x-1/2 max-w-lg w-11/12 bg-red-950 border-2 border-red-500 text-slate-100 p-4 rounded-xl shadow-2xl z-50 hidden">
-        <div class="flex items-start">
-            <div class="w-8 h-8 rounded-full bg-red-900 border border-red-500 flex items-center justify-center text-red-300 flex-shrink-0 text-base mr-3">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="flex-grow">
-                <h3 class="text-sm font-bold text-red-300" id="popupErrorTitle">Diagnostic Alert</h3>
-                <p class="text-xs text-slate-300 font-mono mt-1 break-words leading-relaxed" id="popupErrorBody">Notice</p>
-            </div>
-            <button id="dismissAlertBtn" class="text-slate-400 hover:text-white p-1 text-sm flex-shrink-0 ml-2">
-                <i class="fa-solid fa-times"></i>
-            </button>
-        </div>
-    </div>
-
     <!-- Header Navigation -->
     <header class="border-b border-gray-800 bg-black px-6 py-4">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -59,9 +43,9 @@
                 </div>
             </div>
             <div class="flex items-center space-x-3">
-                <button id="playerToggleBtn" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 text-xs font-mono text-gray-300 flex items-center transition">
+                <button id="playerToggleBtn" onclick="togglePlayerVisibility()" class="px-3 py-1.5 rounded-lg border border-gray-700 bg-gray-900 hover:bg-gray-800 text-xs font-mono text-gray-300 flex items-center transition">
                     <i class="fa-solid fa-video mr-1.5 text-green-400"></i>
-                    <span>Show Video Player</span>
+                    <span id="playerToggleText">Show Video Player</span>
                 </button>
                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-900 bg-opacity-30 text-green-400 border border-green-700">
                     <span class="w-2 h-2 mr-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -73,7 +57,7 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- ACTIVE LINK STATUS BANNER: Instant absolute URL display and 1-click copy -->
+        <!-- ACTIVE LINK STATUS BANNER: Computes immediately via inline script -->
         <div class="bg-gray-900 px-4 py-3 rounded-xl border border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between text-xs shadow-lg">
             <div class="flex items-center space-x-2">
                 <span id="videoStatusIndicator" class="w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0"></span>
@@ -81,51 +65,28 @@
                 <strong id="loadedTitle" class="text-slate-200 font-serif text-sm">Introduction</strong>
             </div>
             <div class="text-xs bg-black px-3 py-2 rounded-lg border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-3 overflow-hidden max-w-full">
-                <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400 font-medium">Ready</span></span>
-                <button id="btnCopyLoaded" class="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0 transition" title="Copy exact link">
+                <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400 font-medium"></span></span>
+                <button onclick="copyCurrentLoadedPath()" class="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0 transition" title="Copy exact link">
                     <i class="fa-regular fa-copy text-sm"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Top Split View: Video Streamer & Quick Selection Lists -->
+        <!-- Top Split View: Video Streamer & Playlists -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Video Player (Hidden by default; No MP4 loaded until explicitly unhidden) -->
+            <!-- Video Player (Hidden by default; No video tag exists until explicitly clicked) -->
             <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div id="videoMountContainer" class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
-                        <div id="playerPlaceholder" class="text-slate-500 text-xs font-mono">
-                            Video player idle. Click "Show Video Player" to preview media.
-                        </div>
-                    </div>
-                </div>
-
-                <!-- React Integration Sandbox Documentation -->
-                <div class="bg-gray-900 rounded-xl p-4 border border-gray-800">
-                    <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 flex items-center">
-                        <i class="fa-solid fa-link text-yellow-500 mr-2"></i>
-                        How to Load Videos inside your React App
-                    </h3>
-                    <p class="text-xs text-slate-400 leading-relaxed mb-3">
-                        Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>).
-                    </p>
-                    <div class="space-y-2">
-                        <div>
-                            <span class="text-xs text-slate-400 uppercase font-semibold block">Method A: Query Parameters (Simplest)</span>
-                            <code id="methodACode" class="text-yellow-400 font-mono block mt-1 bg-black p-2 rounded text-xs overflow-x-auto whitespace-nowrap">
-                                <iframe src="./index.html?file=chapter1.mp4" />
-                            </code>
-                        </div>
-                        <div class="pt-1">
-                            <span class="text-xs text-slate-400 uppercase font-semibold block">Method B: Direct Source Usage in React Player</span>
-                            <p class="text-xs text-slate-400 mb-1">Copy any direct link below to stream straight into a React <code><video></code> tag!</p>
+                        <div class="text-slate-500 text-xs font-mono">
+                            Video player idle. Select any video below to preview media.
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Categorized Playlists (Full Width by default) -->
+            <!-- Categorized Playlists (100% Pre-rendered in HTML so they NEVER fail to show) -->
             <section id="sidebarSection" class="lg:col-span-12 flex flex-col space-y-5">
                 
                 <!-- Category 1: Core History -->
@@ -137,10 +98,60 @@
                             <p class="text-xs text-slate-400">Primary curriculum chapters synced to historical chat states</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="chaptersContainer"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="c1Grid">
+                        
+                        <div id="card-intro" onclick="selectVideo('introduction.mp4', 'Introduction')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Introduction</p><p class="text-[10px] text-slate-500 font-mono truncate">introduction.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'introduction.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-ch1" onclick="selectVideo('chapter1.mp4', 'Chapter 1: The Gathering Storm')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Chapter 1: The Gathering Storm</p><p class="text-[10px] text-slate-500 font-mono truncate">chapter1.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'chapter1.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-ch2" onclick="selectVideo('chapter2.mp4', 'Chapter 2: The Spark & Early War')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Chapter 2: The Spark & Early War</p><p class="text-[10px] text-slate-500 font-mono truncate">chapter2.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'chapter2.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-ch3" onclick="selectVideo('chapter3.mp4', 'Chapter 3: The Turning Tide')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Chapter 3: The Turning Tide</p><p class="text-[10px] text-slate-500 font-mono truncate">chapter3.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'chapter3.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-ch4" onclick="selectVideo('chapter4.mp4', 'Chapter 4: The Road to Victory')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Chapter 4: The Road to Victory</p><p class="text-[10px] text-slate-500 font-mono truncate">chapter4.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'chapter4.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-ch5" onclick="selectVideo('chapter5.mp4', 'Chapter 5: The Future')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-play text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Chapter 5: The Future</p><p class="text-[10px] text-slate-500 font-mono truncate">chapter5.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'chapter5.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                    </div>
                 </div>
 
-                <!-- Category 2: Documentaries -->
+                <!-- Category 2: Historical Documentaries -->
                 <div class="bg-custom-card rounded-xl p-4 border border-gray-800">
                     <div class="flex items-center space-x-2 mb-3 pb-2 border-b border-gray-800">
                         <i class="fa-solid fa-clapperboard text-blue-400 text-sm"></i>
@@ -149,7 +160,49 @@
                             <p class="text-xs text-slate-400">Supplementary media mapped dynamically from root folder</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="documentariesContainer"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="c2Grid">
+                        
+                        <div id="card-doc1" onclick="selectVideo('autobiography.mp4', 'Autobiography')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-film text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Autobiography</p><p class="text-[10px] text-slate-500 font-mono truncate">autobiography.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'autobiography.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-doc2" onclick="selectVideo('gettysburg.mp4', 'Battle of Gettysburg')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-film text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Battle of Gettysburg</p><p class="text-[10px] text-slate-500 font-mono truncate">gettysburg.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'gettysburg.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-doc3" onclick="selectVideo('sherman.mp4', 'Sherman\'s march to sea')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-film text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Sherman's march to sea</p><p class="text-[10px] text-slate-500 font-mono truncate">sherman.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'sherman.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-doc4" onclick="selectVideo('economicssouth.mp4', 'Economics of the South')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-film text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Economics of the South</p><p class="text-[10px] text-slate-500 font-mono truncate">economicssouth.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'economicssouth.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-doc5" onclick="selectVideo('economicsnorth.mp4', 'Economics of the North')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-film text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Economics of the North</p><p class="text-[10px] text-slate-500 font-mono truncate">economicsnorth.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'economicsnorth.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                    </div>
                 </div>
 
                 <!-- Category 3: TenDayBook Masterclass -->
@@ -161,13 +214,63 @@
                             <p class="text-xs text-slate-400">Book blueprint, authoring, and publishing guides</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="bookChaptersContainer"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2" id="c3Grid">
+                        
+                        <div id="card-chap1" onclick="selectVideo('The%20Ten-Day%20Book%20Sprint.mp4', 'Overview')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Overview</p><p class="text-[10px] text-slate-500 font-mono truncate">The Ten-Day Book Sprint.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'The%20Ten-Day%20Book%20Sprint.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-chap2" onclick="selectVideo('The%2010-Day%20Book%20Blueprint.mp4', 'Outline')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Outline</p><p class="text-[10px] text-slate-500 font-mono truncate">The 10-Day Book Blueprint.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'The%2010-Day%20Book%20Blueprint.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-chap3" onclick="selectVideo('Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4', 'Draft Your Book')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Draft Your Book</p><p class="text-[10px] text-slate-500 font-mono truncate">Draft Your Book - TenDayBook App (1).mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-chap4" onclick="selectVideo('Chapter%204_%20Proof%20Read%20and%20Review.mp4', 'Proof Read')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Proof Read</p><p class="text-[10px] text-slate-500 font-mono truncate">Chapter 4_ Proof Read and Review.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'Chapter%204_%20Proof%20Read%20and%20Review.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-chap5" onclick="selectVideo('TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4', 'End Matters')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">End Matters</p><p class="text-[10px] text-slate-500 font-mono truncate">TenDayBook Masterclass - Chapter 5_ End Matters.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                        <div id="card-chap6" onclick="selectVideo('Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4', 'Publish')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                            <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
+                                <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Publish</p><p class="text-[10px] text-slate-500 font-mono truncate">Day 10 - KDP Export & Publishing Guide.mp4</p></div>
+                            </div>
+                            <button onclick="copyExplicitPath(event, 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                        </div>
+
+                    </div>
                 </div>
 
             </section>
         </div>
 
-        <!-- MASTER DIRECTORY TABLE: 17 assets listed with 1-click URL copying -->
+        <!-- MASTER DIRECTORY TABLE: 100% Pre-rendered in HTML -->
         <section class="bg-custom-card rounded-xl p-5 border border-gray-800">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 mb-4 border-b border-gray-800 gap-2">
                 <div>
@@ -178,7 +281,7 @@
                     <p class="text-xs text-slate-400">Full catalog of direct media links ready for integration with Abe and external apps</p>
                 </div>
                 <div class="text-xs text-slate-400 font-mono bg-black px-3 py-1.5 rounded border border-gray-800">
-                    Total Assets: <span id="assetCount" class="text-yellow-400 font-bold">17</span>
+                    Total Assets: <span class="text-yellow-400 font-bold">17</span>
                 </div>
             </div>
 
@@ -193,7 +296,46 @@
                             <th class="p-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="masterDirectoryTableBody" class="divide-y divide-gray-800 text-slate-300"></tbody>
+                    <tbody class="divide-y divide-gray-800 text-slate-300">
+                        
+                        <!-- Core History -->
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-yellow-900 text-yellow-300 border-yellow-700">Core History</span></td><td class="p-3 font-semibold text-slate-200">Introduction</td><td class="p-3 text-emerald-400 truncate max-w-xs">introduction.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Start</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('introduction.mp4', 'Introduction')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'introduction.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+                        
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-yellow-900 text-yellow-300 border-yellow-700">Core History</span></td><td class="p-3 font-semibold text-slate-200">Chapter 1: The Gathering Storm</td><td class="p-3 text-emerald-400 truncate max-w-xs">chapter1.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Start at Chapter 1: The Gathering Storm</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('chapter1.mp4', 'Chapter 1: The Gathering Storm')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'chapter1.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+                        
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-yellow-900 text-yellow-300 border-yellow-700">Core History</span></td><td class="p-3 font-semibold text-slate-200">Chapter 2: The Spark & Early War</td><td class="p-3 text-emerald-400 truncate max-w-xs">chapter2.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Start at Chapter 2: The Spark & The Early War</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('chapter2.mp4', 'Chapter 2: The Spark & Early War')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'chapter2.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-yellow-900 text-yellow-300 border-yellow-700">Core History</span></td><td class="p-3 font-semibold text-slate-200">Chapter 3: The Turning Tide</td><td class="p-3 text-emerald-400 truncate max-w-xs">chapter3.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Start at Chapter 3: The Turning Tide</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('chapter3.mp4', 'Chapter 3: The Turning Tide')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'chapter3.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-yellow-900 text-yellow-300 border-yellow-700">Core History</span></td><td class="p-3 font-semibold text-slate-200">Chapter 4: The Road to Victory</td><td class="p-3 text-emerald-400 truncate max-w-xs">chapter4.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Start at Chapter 4: The Road to Victory</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('chapter4.mp4', 'Chapter 4: The Road to Victory')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'chapter4.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-yellow-900 text-yellow-300 border-yellow-700">Core History</span></td><td class="p-3 font-semibold text-slate-200">Chapter 5: The Future</td><td class="p-3 text-emerald-400 truncate max-w-xs">chapter5.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Start at Chapter 5: The Future</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('chapter5.mp4', 'Chapter 5: The Future')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'chapter5.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <!-- Documentaries -->
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-blue-900 text-blue-300 border-blue-700">Documentaries</span></td><td class="p-3 font-semibold text-slate-200">Autobiography</td><td class="p-3 text-emerald-400 truncate max-w-xs">autobiography.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Autobiography</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('autobiography.mp4', 'Autobiography')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'autobiography.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-blue-900 text-blue-300 border-blue-700">Documentaries</span></td><td class="p-3 font-semibold text-slate-200">Battle of Gettysburg</td><td class="p-3 text-emerald-400 truncate max-w-xs">gettysburg.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Battle of Gettysburg</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('gettysburg.mp4', 'Battle of Gettysburg')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'gettysburg.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-blue-900 text-blue-300 border-blue-700">Documentaries</span></td><td class="p-3 font-semibold text-slate-200">Sherman's march to sea</td><td class="p-3 text-emerald-400 truncate max-w-xs">sherman.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Sherman's march to sea</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('sherman.mp4', 'Sherman\'s march to sea')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'sherman.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-blue-900 text-blue-300 border-blue-700">Documentaries</span></td><td class="p-3 font-semibold text-slate-200">Economics of the South</td><td class="p-3 text-emerald-400 truncate max-w-xs">economicssouth.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Economics of the South</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('economicssouth.mp4', 'Economics of the South')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'economicssouth.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-blue-900 text-blue-300 border-blue-700">Documentaries</span></td><td class="p-3 font-semibold text-slate-200">Economics of the North</td><td class="p-3 text-emerald-400 truncate max-w-xs">economicsnorth.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Economics of the North</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('economicsnorth.mp4', 'Economics of the North')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'economicsnorth.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <!-- TenDayBook Masterclass -->
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Overview</td><td class="p-3 text-emerald-400 truncate max-w-xs">The Ten-Day Book Sprint.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">The Ten-Day Book Sprint</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('The%20Ten-Day%20Book%20Sprint.mp4', 'Overview')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'The%20Ten-Day%20Book%20Sprint.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Outline</td><td class="p-3 text-emerald-400 truncate max-w-xs">The 10-Day Book Blueprint.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">The 10-Day Book Blueprint</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('The%2010-Day%20Book%20Blueprint.mp4', 'Outline')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'The%2010-Day%20Book%20Blueprint.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Draft Your Book</td><td class="p-3 text-emerald-400 truncate max-w-xs">Draft Your Book - TenDayBook App (1).mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Draft Your Book - TenDayBook App</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4', 'Draft Your Book')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Proof Read</td><td class="p-3 text-emerald-400 truncate max-w-xs">Chapter 4_ Proof Read and Review.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Chapter 4: Proof Read and Review</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('Chapter%204_%20Proof%20Read%20and%20Review.mp4', 'Proof Read')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'Chapter%204_%20Proof%20Read%20and%20Review.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">End Matters</td><td class="p-3 text-emerald-400 truncate max-w-xs">TenDayBook Masterclass - Chapter 5_ End Matters.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">TenDayBook Masterclass - Chapter 5: End Matters</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4', 'End Matters')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Publish</td><td class="p-3 text-emerald-400 truncate max-w-xs">Day 10 - KDP Export & Publishing Guide.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Day 10 - KDP Export & Publishing Guide</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4', 'Publish')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -205,45 +347,34 @@
         <i class="fa-solid fa-check mr-2"></i> Direct path copied to clipboard!
     </div>
 
-    <!-- MAIN ENGINE SCRIPT -->
+    <!-- CLEAN, FOOLPROOF JAVASCRIPT CONTROLLER -->
     <script>
-        // --- 1. DATASET DEFINITIONS ---
-        var coreChapters = [
-            { id: 'intro', category: 'Core History', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
-            { id: 'ch1', category: 'Core History', label: 'Chapter 1: The Gathering Storm', path: 'chapter1.mp4', prompt: 'Start at Chapter 1: The Gathering Storm' },
-            { id: 'ch2', category: 'Core History', label: 'Chapter 2: The Spark & Early War', path: 'chapter2.mp4', prompt: 'Start at Chapter 2: The Spark & The Early War' },
-            { id: 'ch3', category: 'Core History', label: 'Chapter 3: The Turning Tide', path: 'chapter3.mp4', prompt: 'Start at Chapter 3: The Turning Tide' },
-            { id: 'ch4', category: 'Core History', label: 'Chapter 4: The Road to Victory', path: 'chapter4.mp4', prompt: 'Start at Chapter 4: The Road to Victory' },
-            { id: 'ch5', category: 'Core History', label: 'Chapter 5: The Future', path: 'chapter5.mp4', prompt: 'Start at Chapter 5: The Future' }
-        ];
+        var currentActivePath = 'introduction.mp4';
 
-        var documentaries = [
-            { id: 'doc1', category: 'Documentaries', label: 'Autobiography', path: 'autobiography.mp4', prompt: 'Autobiography' },
-            { id: 'doc2', category: 'Documentaries', label: 'Battle of Gettysburg', path: 'gettysburg.mp4', prompt: 'Battle of Gettysburg' },
-            { id: 'doc3', category: 'Documentaries', label: "Sherman's march to sea", path: 'sherman.mp4', prompt: "Sherman's march to sea" },
-            { id: 'doc4', category: 'Documentaries', label: 'Economics of the South', path: 'economicssouth.mp4', prompt: 'Economics of the South' },
-            { id: 'doc5', category: 'Documentaries', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
-        ];
-
-        var bookAppChapters = [
-            { id: 'chap1', category: 'TenDayBook', label: 'Overview', path: 'The%20Ten-Day%20Book%20Sprint.mp4', prompt: 'The Ten-Day Book Sprint' },
-            { id: 'chap2', category: 'TenDayBook', label: 'Outline', path: 'The%2010-Day%20Book%20Blueprint.mp4', prompt: 'The 10-Day Book Blueprint' },
-            { id: 'chap3', category: 'TenDayBook', label: 'Draft Your Book', path: 'Draft%20Your%20Book%20-%20TenDayBook%20App%20(1).mp4', prompt: 'Draft Your Book - TenDayBook App' },
-            { id: 'chap4', category: 'TenDayBook', label: 'Proof Read', path: 'Chapter%204_%20Proof%20Read%20and%20Review.mp4', prompt: 'Chapter 4: Proof Read and Review' },
-            { id: 'chap5', category: 'TenDayBook', label: 'End Matters', path: 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4', prompt: 'TenDayBook Masterclass - Chapter 5: End Matters' },
-            { id: 'chap6', category: 'TenDayBook', label: 'Publish', path: 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4', prompt: 'Day 10 - KDP Export & Publishing Guide' }
-        ];
-
-        var allMappedVideos = coreChapters.concat(documentaries, bookAppChapters);
-        var activeVideoAttempt = coreChapters[0];
-        var activeLoadTimer = null;
-
-        // --- 2. CLIPBOARD & UTILITY FUNCTIONS ---
         function getBaseFolderUrl() {
             var url = window.location.href.split('?')[0].split('#')[0];
             return url.substring(0, url.lastIndexOf('/')) + '/';
         }
 
+        // Sets the active link path instantly on load
+        function updateActiveDisplay(path, label) {
+            currentActivePath = path;
+            var abs = getBaseFolderUrl() + encodeURI(decodeURI(path));
+            var pElem = document.getElementById('loadedPath');
+            var tElem = document.getElementById('loadedTitle');
+            if (pElem) pElem.innerText = abs;
+            if (tElem) tElem.innerText = label;
+
+            // Notify Abe
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'SYNC_CHAT',
+                    payload: { path: path, title: label, absoluteUrl: abs }
+                }, '*');
+            }
+        }
+
+        // Clipboard Action
         function copyText(val) {
             if (!val) return;
             if (navigator.clipboard && window.isSecureContext) {
@@ -276,17 +407,16 @@
             }
         }
 
-        // --- 3. EVENT DELEGATION & UI CONTROLS ---
-        document.getElementById('btnCopyLoaded').addEventListener('click', function() {
-            var p = document.getElementById('loadedPath');
-            if (p && p.innerText) copyText(p.innerText);
-        });
+        function copyCurrentLoadedPath() {
+            var abs = getBaseFolderUrl() + encodeURI(decodeURI(currentActivePath));
+            copyText(abs);
+        }
 
-        document.getElementById('dismissAlertBtn').addEventListener('click', function() {
-            document.getElementById('runtimePopupError').classList.add('hidden');
-        });
-
-        document.getElementById('playerToggleBtn').addEventListener('click', togglePlayerVisibility);
+        function copyExplicitPath(event, path) {
+            if (event && event.stopPropagation) event.stopPropagation();
+            var abs = getBaseFolderUrl() + encodeURI(decodeURI(path));
+            copyText(abs);
+        }
 
         function isPlayerVisible() {
             var p = document.getElementById('playerSection');
@@ -294,275 +424,81 @@
         }
 
         function togglePlayerVisibility() {
-            var playerSection = document.getElementById('playerSection');
-            var sidebarSection = document.getElementById('sidebarSection');
-            var btn = document.getElementById('playerToggleBtn');
-            var isHidden = playerSection.classList.contains('hidden');
+            var p = document.getElementById('playerSection');
+            var s = document.getElementById('sidebarSection');
+            var t = document.getElementById('playerToggleText');
+            var isHidden = p.classList.contains('hidden');
 
             if (isHidden) {
-                playerSection.classList.remove('hidden');
-                sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
+                p.classList.remove('hidden');
+                s.className = 'lg:col-span-5 flex flex-col space-y-5';
                 setListsGrid(false);
-                btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
-
-                if (activeVideoAttempt) {
-                    mountAndStreamVideo(activeVideoAttempt, false);
-                }
+                t.innerText = 'Hide Video Player';
+                mountVideoPlayer(currentActivePath);
             } else {
-                playerSection.classList.add('hidden');
-                sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
+                p.classList.add('hidden');
+                s.className = 'lg:col-span-12 flex flex-col space-y-5';
                 setListsGrid(true);
-                btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
-
+                t.innerText = 'Show Video Player';
                 unmountVideoPlayer();
             }
         }
 
         function setListsGrid(asGrid) {
-            var c1 = document.getElementById('chaptersContainer');
-            var c2 = document.getElementById('documentariesContainer');
-            var c3 = document.getElementById('bookChaptersContainer');
+            var g1 = document.getElementById('c1Grid');
+            var g2 = document.getElementById('c2Grid');
+            var g3 = document.getElementById('c3Grid');
             var cls = asGrid ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2' : 'space-y-2';
-            if (c1) c1.className = cls;
-            if (c2) c2.className = cls;
-            if (c3) c3.className = cls;
+            if (g1) g1.className = cls;
+            if (g2) g2.className = cls;
+            if (g3) g3.className = cls;
+        }
+
+        function selectVideo(path, label) {
+            updateActiveDisplay(path, label);
+            if (isPlayerVisible()) {
+                mountVideoPlayer(path);
+            }
+        }
+
+        function playExplicitVideo(path, label) {
+            if (!isPlayerVisible()) {
+                togglePlayerVisibility();
+            }
+            updateActiveDisplay(path, label);
+            mountVideoPlayer(path);
         }
 
         function unmountVideoPlayer() {
-            if (activeLoadTimer) clearTimeout(activeLoadTimer);
-            var container = document.getElementById('videoMountContainer');
-            if (container) {
-                container.innerHTML = '<div id="playerPlaceholder" class="text-slate-500 text-xs font-mono">Video player idle. Click "Show Video Player" to preview media.</div>';
-            }
-            var s = document.getElementById('videoStatusIndicator');
-            if (s) s.className = 'w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0';
-        }
-
-        function revealPlayer() {
-            if (!isPlayerVisible()) togglePlayerVisibility();
-        }
-
-        // --- 4. LIST & DIRECTORY RENDERING ---
-        function renderLists() {
-            var c1 = document.getElementById('chaptersContainer');
-            var c2 = document.getElementById('documentariesContainer');
-            var c3 = document.getElementById('bookChaptersContainer');
-
-            if (c1) c1.innerHTML = buildCards(coreChapters);
-            if (c2) c2.innerHTML = buildCards(documentaries);
-            if (c3) c3.innerHTML = buildCards(bookAppChapters);
-        }
-
-        function buildCards(list) {
-            return list.map(function(item) {
-                var isDoc = item.category === 'Documentaries';
-                var isBook = item.category === 'TenDayBook';
-                var icon = isDoc ? 'fa-film text-blue-400' : (isBook ? 'fa-book-open text-green-400' : 'fa-play text-yellow-500');
-
-                return '<div id="item-' + item.id + '" data-path="' + item.path + '" class="card-item flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">' +
-                    '<div class="flex items-center space-x-3 text-left overflow-hidden mr-2">' +
-                        '<div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs border border-gray-800 flex-shrink-0"><i class="fa-solid ' + icon + ' text-xs"></i></div>' +
-                        '<div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">' + item.label + '</p><p class="text-[10px] text-slate-500 font-mono truncate">' + decodeURIComponent(item.path) + '</p></div>' +
-                    '</div>' +
-                    '<button data-copy="' + item.path + '" class="btn-copy-card text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0 transition" title="Copy URL"><i class="fa-regular fa-copy"></i></button>' +
-                '</div>';
-            }).join('');
-        }
-
-        function renderMasterDirectory() {
-            var tb = document.getElementById('masterDirectoryTableBody');
-            var cnt = document.getElementById('assetCount');
-            if (cnt) cnt.innerText = allMappedVideos.length;
-            if (!tb) return;
-
-            tb.innerHTML = allMappedVideos.map(function(item) {
-                var enc = encodeURI(decodeURI(item.path));
-                var abs = getBaseFolderUrl() + enc;
-                var badge = 'bg-yellow-900 text-yellow-300 border-yellow-700';
-                if (item.category === 'Documentaries') badge = 'bg-blue-900 text-blue-300 border-blue-700';
-                if (item.category === 'TenDayBook') badge = 'bg-green-900 text-green-300 border-green-700';
-
-                return '<tr class="hover:bg-gray-900/60 transition">' +
-                    '<td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border ' + badge + '">' + item.category + '</span></td>' +
-                    '<td class="p-3 font-semibold text-slate-200">' + item.label + '</td>' +
-                    '<td class="p-3 text-slate-400 truncate max-w-xs" title="' + abs + '"><span class="text-emerald-400">' + item.path + '</span></td>' +
-                    '<td class="p-3 text-slate-400 font-mono text-[11px]">' + item.prompt + '</td>' +
-                    '<td class="p-3 text-right whitespace-nowrap">' +
-                        '<button data-play="' + item.path + '" class="btn-play-table px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button>' +
-                        '<button data-copy="' + item.path + '" class="btn-copy-table px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button>' +
-                    '</td>' +
-                '</tr>';
-            }).join('');
-        }
-
-        // Global Click Delegator (captures card selection, card copy, table play, table copy)
-        document.body.addEventListener('click', function(e) {
-            var copyBtn = e.target.closest('[data-copy]');
-            if (copyBtn) {
-                e.stopPropagation();
-                var p = copyBtn.getAttribute('data-copy');
-                var abs = getBaseFolderUrl() + encodeURI(decodeURI(p));
-                copyText(abs);
-                return;
-            }
-
-            var playBtn = e.target.closest('[data-play]');
-            if (playBtn) {
-                e.stopPropagation();
-                var pPlay = playBtn.getAttribute('data-play');
-                revealPlayer();
-                playVideoByPath(pPlay, true);
-                return;
-            }
-
-            var card = e.target.closest('.card-item');
-            if (card) {
-                var pCard = card.getAttribute('data-path');
-                playVideoByPath(pCard, isPlayerVisible());
-            }
-        });
-
-        // --- 5. SELECTION & STREAMING LOGIC ---
-        function playVideoByPath(path, triggerAutoPlay) {
-            var raw = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
-            var video = null;
-            for (var i = 0; i < allMappedVideos.length; i++) {
-                if (decodeURIComponent(allMappedVideos[i].path) === raw || allMappedVideos[i].path === path) {
-                    video = allMappedVideos[i];
-                    break;
-                }
-            }
-            if (!video) return;
-            activeVideoAttempt = video;
-
-            var cards = document.querySelectorAll('.card-item');
-            for (var j = 0; j < cards.length; j++) {
-                cards[j].style.borderColor = '#1f2937';
-                cards[j].style.backgroundColor = '#111827';
-            }
-            var activeCard = document.getElementById('item-' + video.id);
-            if (activeCard) {
-                var borderCol = '#60a5fa';
-                if (video.id.startsWith('ch') || video.id === 'intro') borderCol = '#f59e0b';
-                else if (video.id.startsWith('chap')) borderCol = '#34d399';
-                activeCard.style.borderColor = borderCol;
-                activeCard.style.backgroundColor = '#1f2937';
-            }
-
-            var abs = getBaseFolderUrl() + encodeURI(decodeURI(video.path));
-            var tElem = document.getElementById('loadedTitle');
-            var pElem = document.getElementById('loadedPath');
-            if (tElem) tElem.innerText = video.label;
-            if (pElem) pElem.innerText = abs;
-
-            dispatchPromptSync(video);
-
-            if (isPlayerVisible()) {
-                mountAndStreamVideo(video, triggerAutoPlay);
+            var mount = document.getElementById('videoMountContainer');
+            if (mount) {
+                mount.innerHTML = '<div class="text-slate-500 text-xs font-mono">Video player idle. Select any video below to preview media.</div>';
             }
         }
 
-        function mountAndStreamVideo(video, triggerAutoPlay) {
-            var container = document.getElementById('videoMountContainer');
-            if (!container) return;
-
-            var enc = encodeURI(decodeURI(video.path));
-            container.innerHTML = '<video id="courseVideoPlayer" class="w-full h-full object-contain" controls playsinline preload="auto" src="' + enc + '">' +
+        function mountVideoPlayer(path) {
+            var mount = document.getElementById('videoMountContainer');
+            if (!mount) return;
+            var enc = encodeURI(decodeURI(path));
+            mount.innerHTML = '<video id="courseVideoPlayer" class="w-full h-full object-contain" controls autoplay playsinline preload="auto" src="' + enc + '">' +
                 'Your browser does not support the video tag.' +
-            '</video>' +
-            '<div id="playerLoadingCover" class="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center gap-3 hidden z-20">' +
-                '<i class="fa-solid fa-circle-notch fa-spin text-yellow-500 text-3xl"></i>' +
-                '<span id="loadingMessage" class="text-xs text-slate-300 font-mono mt-2">Loading "' + video.label + '"...</span>' +
-            '</div>';
-
-            var player = document.getElementById('courseVideoPlayer');
-            var cover = document.getElementById('playerLoadingCover');
-            var s = document.getElementById('videoStatusIndicator');
-
-            if (s) s.className = 'w-2.5 h-2.5 bg-yellow-500 rounded-full animate-ping flex-shrink-0';
-            if (cover) cover.classList.remove('hidden');
-
-            function clearLoading() {
-                if (activeLoadTimer) clearTimeout(activeLoadTimer);
-                if (cover) cover.classList.add('hidden');
-                if (s) s.className = 'w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0';
-            }
-
-            player.addEventListener('canplay', clearLoading);
-            player.addEventListener('loadeddata', clearLoading);
-            player.addEventListener('playing', clearLoading);
-
-            player.addEventListener('error', function() {
-                clearLoading();
-                if (s) s.className = 'w-2.5 h-2.5 bg-rose-500 rounded-full flex-shrink-0';
-            });
-
-            if (activeLoadTimer) clearTimeout(activeLoadTimer);
-            activeLoadTimer = setTimeout(function() {
-                if (player.readyState < 2) clearLoading();
-            }, 8000);
-
-            if (triggerAutoPlay) {
-                player.play().catch(function() { clearLoading(); });
-            }
+            '</video>';
         }
 
-        function dispatchPromptSync(videoObj) {
-            if (window.parent && window.parent !== window) {
-                var enc = encodeURI(decodeURI(videoObj.path));
-                window.parent.postMessage({
-                    type: 'SYNC_CHAT',
-                    payload: {
-                        prompt: videoObj.prompt,
-                        title: videoObj.label,
-                        path: videoObj.path,
-                        absoluteUrl: getBaseFolderUrl() + enc
-                    }
-                }, '*');
-            }
-        }
-
-        // --- 6. SYNCHRONOUS INITIALIZATION ---
-        renderLists();
-        renderMasterDirectory();
-
-        var initialAbs = getBaseFolderUrl() + encodeURI(decodeURI(coreChapters[0].path));
-        document.getElementById('loadedPath').innerText = initialAbs;
-
-        // Remote postMessage listener for Abe
+        // PostMessage listener for Abe
         window.addEventListener('message', function(event) {
-            var command = event.data;
-            if (!command) return;
-
-            if (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH') {
-                var path = command.path || (command.payload && command.payload.path);
-                if (path) {
-                    revealPlayer();
-                    playVideoByPath(path, true);
-                }
-            }
-
-            if (command.type === 'GET_ASSET_DIRECTORY') {
-                if (event.source) {
-                    event.source.postMessage({
-                        type: 'ASSET_DIRECTORY_RESPONSE',
-                        payload: {
-                            baseUrl: getBaseFolderUrl(),
-                            assets: allMappedVideos.map(function(v) {
-                                return {
-                                    id: v.id,
-                                    category: v.category,
-                                    label: v.label,
-                                    path: v.path,
-                                    prompt: v.prompt,
-                                    fullUrl: getBaseFolderUrl() + encodeURI(decodeURI(v.path))
-                                };
-                            })
-                        }
-                    }, '*');
+            var cmd = event.data;
+            if (!cmd) return;
+            if (cmd.type === 'PLAY' || cmd.type === 'PLAY_VIDEO_BY_PATH') {
+                var targetPath = cmd.path || (cmd.payload && cmd.payload.path);
+                if (targetPath) {
+                    playExplicitVideo(targetPath, targetPath);
                 }
             }
         });
+
+        // Initialize top bar synchronously on load
+        updateActiveDisplay('introduction.mp4', 'Introduction');
     </script>
 </body>
 </html>
