@@ -92,7 +92,7 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- ACTIVE LINK STATUS BANNER: Instant absolute URL display and 1-click copy -->
+        <!-- ACTIVE LINK STATUS BANNER: Instant default path rendered immediately -->
         <div class="bg-gray-900 px-4 py-3 rounded-xl border border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between text-xs shadow-lg">
             <div class="flex items-center space-x-2">
                 <span id="videoStatusIndicator" class="w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0"></span>
@@ -100,7 +100,7 @@
                 <strong id="loadedTitle" class="text-slate-200 font-serif text-sm">Introduction</strong>
             </div>
             <div class="text-xs bg-black px-3 py-2 rounded-lg border border-gray-800 text-slate-400 font-mono flex items-center justify-between gap-3 overflow-hidden max-w-full">
-                <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400 font-medium">Ready</span></span>
+                <span class="truncate">Full Link: <span id="loadedPath" class="text-emerald-400 font-medium"></span></span>
                 <button onclick="copyLoadedPathToClipboard()" class="text-yellow-400 hover:text-yellow-300 p-1 flex-shrink-0 transition" title="Copy exact link">
                     <i class="fa-regular fa-copy text-sm"></i>
                 </button>
@@ -114,7 +114,6 @@
             <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div id="videoMountContainer" class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
-                        <!-- Video element is lazily injected here only when unhidden -->
                         <div id="playerPlaceholder" class="text-slate-500 text-xs font-mono">
                             Video player idle. Click "Show Video Player" to preview media.
                         </div>
@@ -128,7 +127,7 @@
                         How to Load Videos inside your React App
                     </h3>
                     <p class="text-xs text-slate-400 leading-relaxed mb-3">
-                        Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>)[cite: 3].
+                        Your React App can control this webpage instantly by loading it inside an iframe and using query parameters or absolute paths. For filenames with spaces, encode them in the URL (for example, <code>The%20Ten-Day%20Book%20Sprint.mp4</code>).
                     </p>
                     <div class="space-y-2">
                         <div>
@@ -238,89 +237,16 @@
 
     <script>
         // ==========================================
-        // 1. CORE UTILITY & CLIPBOARD FUNCTIONS
+        // 1. IMMEDIATE SYNCHRONOUS RESOLUTION
+        // Computes base URL immediately so it never waits for full page load
         // ==========================================
         function getBaseFolderUrl() {
-            const currentUrl = window.location.href.split('?')[0];
+            const currentUrl = window.location.href.split('?')[0].split('#')[0];
             return currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/';
         }
 
-        function executeClipboardAction(value) {
-            if (!value) return;
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(value).then(showCopyToast).catch(() => fallbackClipboard(value));
-            } else {
-                fallbackClipboard(value);
-            }
-        }
-
-        function fallbackClipboard(value) {
-            const tempBox = document.createElement('textarea');
-            tempBox.value = value;
-            tempBox.style.position = 'fixed';
-            tempBox.style.left = '-9999px';
-            document.body.appendChild(tempBox);
-            tempBox.select();
-            try {
-                document.execCommand('copy');
-                showCopyToast();
-            } catch (err) {
-                console.error('Clipboard copy failed:', err);
-            }
-            document.body.removeChild(tempBox);
-        }
-
-        function showCopyToast() {
-            const toast = document.getElementById('copyToast');
-            if (toast) {
-                toast.classList.remove('opacity-0');
-                toast.classList.add('opacity-100');
-                setTimeout(() => {
-                    toast.classList.remove('opacity-100');
-                    toast.classList.add('opacity-0');
-                }, 2000);
-            }
-        }
-
-        function copyLoadedPathToClipboard() {
-            const pathElem = document.getElementById('loadedPath');
-            if (pathElem && pathElem.innerText) {
-                executeClipboardAction(pathElem.innerText);
-            }
-        }
-
-        function copyRawPath(event, path) {
-            if (event) event.stopPropagation();
-            const encodedPath = encodeURI(decodeURI(path));
-            const absoluteUrl = getBaseFolderUrl() + encodedPath;
-            executeClipboardAction(absoluteUrl);
-        }
-
         // ==========================================
-        // 2. DIAGNOSTICS & POPUP ALERTS
-        // ==========================================
-        window.onerror = function(msg, url, line) {
-            triggerPopupError("Uncaught JavaScript Error", msg + " (Line: " + line + ")");
-        };
-
-        function triggerPopupError(title, detail) {
-            const popup = document.getElementById('runtimePopupError');
-            if (popup) {
-                document.getElementById('popupErrorTitle').innerText = title;
-                document.getElementById('popupErrorBody').innerText = detail;
-                popup.classList.remove('hidden');
-            } else {
-                alert(title + ": " + detail);
-            }
-        }
-
-        function dismissPopupError() {
-            const popup = document.getElementById('runtimePopupError');
-            if (popup) popup.classList.add('hidden');
-        }
-
-        // ==========================================
-        // 3. MASTER ASSET REGISTRY
+        // 2. MASTER ASSET REGISTRY
         // ==========================================
         const coreChapters = [
             { id: 'intro', category: 'Core History', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
@@ -390,8 +316,90 @@
             ...bookAppChapters
         ];
 
-        let activeVideoAttempt = null;
+        let activeVideoAttempt = coreChapters[0];
         let activeLoadTimer = null;
+
+        // Immediately resolve the top link synchronously
+        (function initTopLink() {
+            const initialUrl = getBaseFolderUrl() + encodeURI(decodeURI(coreChapters[0].path));
+            const pathElem = document.getElementById('loadedPath');
+            if (pathElem) pathElem.innerText = initialUrl;
+        })();
+
+        // ==========================================
+        // 3. CLIPBOARD FUNCTIONS
+        // ==========================================
+        function executeClipboardAction(value) {
+            if (!value) return;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(value).then(showCopyToast).catch(() => fallbackClipboard(value));
+            } else {
+                fallbackClipboard(value);
+            }
+        }
+
+        function fallbackClipboard(value) {
+            const tempBox = document.createElement('textarea');
+            tempBox.value = value;
+            tempBox.style.position = 'fixed';
+            tempBox.style.left = '-9999px';
+            document.body.appendChild(tempBox);
+            tempBox.select();
+            try {
+                document.execCommand('copy');
+                showCopyToast();
+            } catch (err) {
+                console.error('Clipboard copy failed:', err);
+            }
+            document.body.removeChild(tempBox);
+        }
+
+        function showCopyToast() {
+            const toast = document.getElementById('copyToast');
+            if (toast) {
+                toast.classList.remove('opacity-0');
+                toast.classList.add('opacity-100');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100');
+                    toast.classList.add('opacity-0');
+                }, 2000);
+            }
+        }
+
+        function copyLoadedPathToClipboard() {
+            const pathElem = document.getElementById('loadedPath');
+            if (pathElem && pathElem.innerText) {
+                executeClipboardAction(pathElem.innerText);
+            }
+        }
+
+        function copyRawPath(event, path) {
+            if (event) event.stopPropagation();
+            const encodedPath = encodeURI(decodeURI(path));
+            const absoluteUrl = getBaseFolderUrl() + encodedPath;
+            executeClipboardAction(absoluteUrl);
+        }
+
+        // ==========================================
+        // 4. DIAGNOSTICS & POPUPS
+        // ==========================================
+        window.onerror = function(msg, url, line) {
+            triggerPopupError("Script Notice", msg + " (Line: " + line + ")");
+        };
+
+        function triggerPopupError(title, detail) {
+            const popup = document.getElementById('runtimePopupError');
+            if (popup) {
+                document.getElementById('popupErrorTitle').innerText = title;
+                document.getElementById('popupErrorBody').innerText = detail;
+                popup.classList.remove('hidden');
+            }
+        }
+
+        function dismissPopupError() {
+            const popup = document.getElementById('runtimePopupError');
+            if (popup) popup.classList.add('hidden');
+        }
 
         function isPlayerVisible() {
             const playerSection = document.getElementById('playerSection');
@@ -399,7 +407,7 @@
         }
 
         // ==========================================
-        // 4. TOGGLE & LAZY PLAYER MOUNTING
+        // 5. TOGGLE PLAYER / NO-LOAD MANAGEMENT
         // ==========================================
         function togglePlayerVisibility() {
             const playerSection = document.getElementById('playerSection');
@@ -411,7 +419,6 @@
             const isHidden = playerSection.classList.contains('hidden');
 
             if (isHidden) {
-                // Show player
                 playerSection.classList.remove('hidden');
                 sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
                 if (chaptersContainer) chaptersContainer.className = 'space-y-2';
@@ -419,12 +426,10 @@
                 if (bookChaptersContainer) bookChaptersContainer.className = 'space-y-2';
                 btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
 
-                // Inject and load player only when unhidden
                 if (activeVideoAttempt) {
                     mountAndStreamVideo(activeVideoAttempt, false);
                 }
             } else {
-                // Hide player
                 playerSection.classList.add('hidden');
                 sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
                 if (chaptersContainer) chaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
@@ -432,7 +437,6 @@
                 if (bookChaptersContainer) bookChaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
                 btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
 
-                // Completely unmount video from DOM so no network activity can occur
                 unmountVideoPlayer();
             }
         }
@@ -458,73 +462,72 @@
         }
 
         // ==========================================
-        // 5. LIFECYCLE INITIALIZATION
+        // 6. INITIALIZATION & RECOVERY
         // ==========================================
-        window.onload = function() {
-            try {
-                renderLists();
-                renderMasterDirectory();
+        document.addEventListener('DOMContentLoaded', initializePortal);
+        window.addEventListener('load', initializePortal);
 
-                const cleanUrl = window.location.href.split('?')[0];
-                const methodCode = document.getElementById('methodACode');
-                if (methodCode) {
-                    methodCode.innerText = `<iframe src="${cleanUrl}?file=chapter1.mp4" />`;
-                }
+        let portalInitialized = false;
+        function initializePortal() {
+            if (portalInitialized) return;
+            portalInitialized = true;
 
-                const queryParams = new URLSearchParams(window.location.search);
-                const targetFilePath = queryParams.get('file');
+            try { renderLists(); } catch (e) { console.error('Error rendering lists:', e); }
+            try { renderMasterDirectory(); } catch (e) { console.error('Error rendering directory:', e); }
 
-                // Set initial selection immediately without touching media elements
-                if (targetFilePath) {
-                    playVideoByPath(targetFilePath, false);
-                } else {
-                    playVideoByPath('introduction.mp4', false);
-                }
-
-                // POSTMESSAGE LISTENER: Abe can trigger or query any video at any time
-                window.addEventListener('message', function(event) {
-                    const command = event.data;
-                    if (!command) return;
-
-                    // Remote play command from Abe
-                    if (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH') {
-                        const path = command.path || command.payload?.path;
-                        if (path) {
-                            revealPlayer();
-                            playVideoByPath(path, true);
-                        }
-                    }
-
-                    // Directory sync request from Abe
-                    if (command.type === 'GET_ASSET_DIRECTORY') {
-                        if (event.source) {
-                            event.source.postMessage({
-                                type: 'ASSET_DIRECTORY_RESPONSE',
-                                payload: {
-                                    baseUrl: getBaseFolderUrl(),
-                                    assets: allMappedVideos.map(v => ({
-                                        ...v,
-                                        fullUrl: getBaseFolderUrl() + encodeURI(decodeURI(v.path))
-                                    }))
-                                }
-                            }, '*');
-                        }
-                    }
-                });
-            } catch (err) {
-                triggerPopupError("Initialization Error", err.message);
+            const cleanUrl = window.location.href.split('?')[0].split('#')[0];
+            const methodCode = document.getElementById('methodACode');
+            if (methodCode) {
+                methodCode.innerText = `<iframe src="${cleanUrl}?file=chapter1.mp4" />`;
             }
-        };
+
+            const queryParams = new URLSearchParams(window.location.search);
+            const targetFilePath = queryParams.get('file');
+
+            if (targetFilePath) {
+                playVideoByPath(targetFilePath, false);
+            } else {
+                playVideoByPath('introduction.mp4', false);
+            }
+
+            // PostMessage Listener for Abe
+            window.addEventListener('message', function(event) {
+                const command = event.data;
+                if (!command) return;
+
+                if (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH') {
+                    const path = command.path || command.payload?.path;
+                    if (path) {
+                        revealPlayer();
+                        playVideoByPath(path, true);
+                    }
+                }
+
+                if (command.type === 'GET_ASSET_DIRECTORY') {
+                    if (event.source) {
+                        event.source.postMessage({
+                            type: 'ASSET_DIRECTORY_RESPONSE',
+                            payload: {
+                                baseUrl: getBaseFolderUrl(),
+                                assets: allMappedVideos.map(v => ({
+                                    ...v,
+                                    fullUrl: getBaseFolderUrl() + encodeURI(decodeURI(v.path))
+                                }))
+                            }
+                        }, '*');
+                    }
+                }
+            });
+        }
 
         // ==========================================
-        // 6. UI RENDERING
+        // 7. PLAYLIST & DIRECTORY RENDERING
         // ==========================================
         function renderLists() {
             const chapterList = document.getElementById('chaptersContainer');
             const documentaryList = document.getElementById('documentariesContainer');
             const bookAppList = document.getElementById('bookChaptersContainer');
 
-            // 1. Core Chapters
             if (chapterList) {
                 chapterList.innerHTML = coreChapters.map(item => `
                     <div id="item-${item.id}" onclick="handleAssetSelected('${item.path.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
@@ -544,7 +547,6 @@
                 `).join('');
             }
 
-            // 2. Documentaries
             if (documentaryList) {
                 documentaryList.innerHTML = documentaries.map(item => `
                     <div id="item-${item.id}" onclick="handleAssetSelected('${item.path.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
@@ -564,7 +566,6 @@
                 `).join('');
             }
 
-            // 3. Book App Chapters
             if (bookAppList) {
                 bookAppList.innerHTML = bookAppChapters.map(item => `
                     <div id="item-${item.id}" onclick="handleAssetSelected('${item.path.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
@@ -626,7 +627,7 @@
         }
 
         // ==========================================
-        // 7. SELECTION & PLAYBACK LOGIC
+        // 8. SELECTION & LINK LOGIC
         // ==========================================
         function handleAssetSelected(path) {
             playVideoByPath(path, isPlayerVisible());
@@ -648,7 +649,7 @@
 
             activeVideoAttempt = video;
 
-            // Highlight active playlist item
+            // Highlight card
             document.querySelectorAll('[id^="item-"]').forEach(el => {
                 el.style.borderColor = '#1f2937';
                 el.style.backgroundColor = '#111827';
@@ -665,7 +666,7 @@
                 activeCard.style.backgroundColor = '#1f2937';
             }
 
-            // IMMEDIATELY compute and write the exact link to the DOM (Never hangs on 'Loading...')
+            // Instantly write the exact link to the DOM (Never hangs)
             const encodedPath = encodeURI(decodeURI(video.path));
             const absoluteUrl = getBaseFolderUrl() + encodedPath;
 
@@ -674,23 +675,21 @@
             if (titleElem) titleElem.innerText = video.label;
             if (pathElem) pathElem.innerText = absoluteUrl;
 
-            // Always sync Abe via postMessage
+            // Dispatch sync to Abe
             dispatchPromptSync(video);
 
-            // Mount and load the MP4 only if player is visible
+            // Only stream if player is visible
             if (isPlayerVisible()) {
                 mountAndStreamVideo(video, triggerAutoPlay);
             }
         }
 
-        // Dynamically injects video player only when requested
         function mountAndStreamVideo(video, triggerAutoPlay = false) {
             const container = document.getElementById('videoMountContainer');
             if (!container) return;
 
             const encodedPath = encodeURI(decodeURI(video.path));
 
-            // Cleanly inject fresh video player HTML
             container.innerHTML = `
                 <video 
                     id="courseVideoPlayer" 
@@ -723,7 +722,6 @@
             player.addEventListener('canplay', clearLoading);
             player.addEventListener('loadeddata', clearLoading);
             player.addEventListener('playing', clearLoading);
-            player.addEventListener('play', handleVideoStarted);
 
             player.addEventListener('error', () => {
                 clearLoading();
@@ -733,29 +731,11 @@
 
             if (activeLoadTimer) clearTimeout(activeLoadTimer);
             activeLoadTimer = setTimeout(() => {
-                if (player.readyState < 2) {
-                    clearLoading();
-                }
+                if (player.readyState < 2) clearLoading();
             }, 8000);
 
             if (triggerAutoPlay) {
-                player.play().catch(() => {
-                    clearLoading();
-                });
-            }
-        }
-
-        function handleVideoStarted() {
-            const pathElem = document.getElementById('loadedPath');
-            if (!pathElem) return;
-
-            const currentPathElement = pathElem.innerText;
-            const absoluteBase = getBaseFolderUrl();
-            const relativePath = decodeURIComponent(currentPathElement.replace(absoluteBase, ''));
-            
-            const currentVideo = allMappedVideos.find(v => decodeURIComponent(v.path) === relativePath || v.path === relativePath);
-            if (currentVideo) {
-                dispatchPromptSync(currentVideo);
+                player.play().catch(() => clearLoading());
             }
         }
 
