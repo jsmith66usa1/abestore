@@ -92,7 +92,7 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- ACTIVE LINK STATUS BANNER: Always visible even when video player is hidden -->
+        <!-- ACTIVE LINK STATUS BANNER: Always visible whether player is hidden or shown -->
         <div class="bg-gray-900 px-4 py-3 rounded-xl border border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between text-xs shadow-lg">
             <div class="flex items-center space-x-2">
                 <span id="videoStatusIndicator" class="w-2.5 h-2.5 bg-yellow-500 rounded-full flex-shrink-0"></span>
@@ -110,7 +110,7 @@
         <!-- Top Split View: Video Streamer (HIDDEN BY DEFAULT) & Quick Selection Playlists -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Left Column: Video Streamer (HIDDEN by default with 'hidden' class) -->
+            <!-- Left Column: Video Streamer (HIDDEN by default with 'hidden' class; No MP4 loaded until revealed) -->
             <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
@@ -120,7 +120,7 @@
                             class="w-full h-full object-contain" 
                             controls 
                             playsinline 
-                            preload="auto">
+                            preload="none">
                             <source id="videoSource" src="" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
@@ -176,7 +176,7 @@
                 </div>
             </section>
 
-            <!-- Right Column: Interactive Quick Selection Playlists (Expanded to Full Width by Default) -->
+            <!-- Right Column: Interactive Quick Selection Playlists (Full Width when player is hidden) -->
             <section id="sidebarSection" class="lg:col-span-12 flex flex-col space-y-5">
                 
                 <!-- Category 1: Chapters -->
@@ -288,35 +288,6 @@
             if (popup) popup.classList.add('hidden');
         }
 
-        // Toggle Player Visibility between Full Width List and Split Player View
-        function togglePlayerVisibility() {
-            const playerSection = document.getElementById('playerSection');
-            const sidebarSection = document.getElementById('sidebarSection');
-            const chaptersContainer = document.getElementById('chaptersContainer');
-            const documentariesContainer = document.getElementById('documentariesContainer');
-            const bookChaptersContainer = document.getElementById('bookChaptersContainer');
-            const btn = document.getElementById('playerToggleBtn');
-            const isHidden = playerSection.classList.contains('hidden');
-
-            if (isHidden) {
-                // Show player
-                playerSection.classList.remove('hidden');
-                sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
-                if (chaptersContainer) chaptersContainer.className = 'space-y-2';
-                if (documentariesContainer) documentariesContainer.className = 'space-y-2';
-                if (bookChaptersContainer) bookChaptersContainer.className = 'space-y-2';
-                btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
-            } else {
-                // Hide player (default state)
-                playerSection.classList.add('hidden');
-                sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
-                if (chaptersContainer) chaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
-                if (documentariesContainer) documentariesContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
-                if (bookChaptersContainer) bookChaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
-                btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
-            }
-        }
-
         // Core History Course Chapters
         const coreChapters = [
             { id: 'intro', category: 'Core History', label: 'Introduction', path: 'introduction.mp4', prompt: 'Start' },
@@ -336,7 +307,7 @@
             { id: 'doc5', category: 'Documentaries', label: 'Economics of the North', path: 'economicsnorth.mp4', prompt: 'Economics of the North' }
         ];
 
-        // Book App Chapters (URLs pre-encoded for paths containing spaces/special characters)
+        // Book App Chapters (URLs pre-encoded for paths containing spaces/special characters)[cite: 3]
         const bookAppChapters = [
             {
                 id: 'chap1',
@@ -397,6 +368,65 @@
             return currentUrl.substring(0, currentUrl.lastIndexOf('/')) + '/';
         }
 
+        // Check if player UI is currently visible
+        function isPlayerVisible() {
+            const playerSection = document.getElementById('playerSection');
+            return playerSection && !playerSection.classList.contains('hidden');
+        }
+
+        // Toggle Player Visibility: Unhiding loads the active video; Hiding pauses and halts MP4 stream
+        function togglePlayerVisibility() {
+            const playerSection = document.getElementById('playerSection');
+            const sidebarSection = document.getElementById('sidebarSection');
+            const chaptersContainer = document.getElementById('chaptersContainer');
+            const documentariesContainer = document.getElementById('documentariesContainer');
+            const bookChaptersContainer = document.getElementById('bookChaptersContainer');
+            const btn = document.getElementById('playerToggleBtn');
+            const isHidden = playerSection.classList.contains('hidden');
+
+            if (isHidden) {
+                // UNHIDE PLAYER: Reveal UI, shrink grid, and load/buffer the active video
+                playerSection.classList.remove('hidden');
+                sidebarSection.className = 'lg:col-span-5 flex flex-col space-y-5';
+                if (chaptersContainer) chaptersContainer.className = 'space-y-2';
+                if (documentariesContainer) documentariesContainer.className = 'space-y-2';
+                if (bookChaptersContainer) bookChaptersContainer.className = 'space-y-2';
+                btn.innerHTML = '<i class="fa-solid fa-eye-slash mr-1.5 text-yellow-500"></i><span>Hide Video Player</span>';
+
+                // Now load the active selected MP4 since player is visible
+                if (activeVideoAttempt) {
+                    loadAndStreamVideo(activeVideoAttempt, false);
+                }
+            } else {
+                // HIDE PLAYER: Pause player, clear source to stop network transfer, expand list grid
+                playerSection.classList.add('hidden');
+                sidebarSection.className = 'lg:col-span-12 flex flex-col space-y-5';
+                if (chaptersContainer) chaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
+                if (documentariesContainer) documentariesContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
+                if (bookChaptersContainer) bookChaptersContainer.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2';
+                btn.innerHTML = '<i class="fa-solid fa-video mr-1.5 text-green-400"></i><span>Show Video Player</span>';
+
+                // Release media buffer and stop loading
+                haltVideoPlayer();
+            }
+        }
+
+        // Stops video playback and releases the network stream buffer
+        function haltVideoPlayer() {
+            const player = document.getElementById('courseVideoPlayer');
+            const source = document.getElementById('videoSource');
+            const cover = document.getElementById('playerLoadingCover');
+            if (activeLoadTimer) clearTimeout(activeLoadTimer);
+
+            if (player) {
+                player.pause();
+                if (source) source.src = '';
+                player.removeAttribute('src');
+                player.load(); // Resets network element
+            }
+            if (cover) cover.classList.add('hidden');
+        }
+
         window.onload = function() {
             try {
                 attachVideoPlayerListeners();
@@ -412,19 +442,41 @@
                 const queryParams = new URLSearchParams(window.location.search);
                 const targetFilePath = queryParams.get('file');
 
+                // Initialize selection metadata & direct link without loading the MP4 file (player starts hidden)
                 if (targetFilePath) {
                     playVideoByPath(targetFilePath, false);
                 } else {
                     playVideoByPath('introduction.mp4', false);
                 }
 
-                // PostMessage listener so Abe can trigger any video remotely
+                // POSTMESSAGE LISTENER: Abe can trigger or query any video at any time
                 window.addEventListener('message', function(event) {
                     const command = event.data;
-                    if (command && (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH')) {
+                    if (!command) return;
+
+                    // Abe requests to play/select a video
+                    if (command.type === 'PLAY' || command.type === 'PLAY_VIDEO_BY_PATH') {
                         const path = command.path || command.payload?.path;
                         if (path) {
+                            // If Abe sends a PLAY command, automatically reveal the player and play it
+                            revealPlayer();
                             playVideoByPath(path, true);
+                        }
+                    }
+
+                    // Abe requests the full asset directory
+                    if (command.type === 'GET_ASSET_DIRECTORY') {
+                        if (event.source) {
+                            event.source.postMessage({
+                                type: 'ASSET_DIRECTORY_RESPONSE',
+                                payload: {
+                                    baseUrl: getBaseFolderUrl(),
+                                    assets: allMappedVideos.map(v => ({
+                                        ...v,
+                                        fullUrl: getBaseFolderUrl() + encodeURI(decodeURI(v.path))
+                                    }))
+                                }
+                            }, '*');
                         }
                     }
                 });
@@ -432,6 +484,12 @@
                 triggerPopupError("Initialization Error", err.message);
             }
         };
+
+        function revealPlayer() {
+            if (!isPlayerVisible()) {
+                togglePlayerVisibility();
+            }
+        }
 
         function attachVideoPlayerListeners() {
             const player = document.getElementById('courseVideoPlayer');
@@ -453,18 +511,20 @@
                 player.addEventListener('play', handleVideoStarted);
 
                 player.addEventListener('waiting', () => {
-                    if (cover) {
+                    if (cover && isPlayerVisible()) {
                         cover.classList.remove('hidden');
                         document.getElementById('loadingMessage').innerText = 'Buffering media stream...';
                     }
                 });
 
                 player.addEventListener('error', () => {
-                    handleVideoLoadFailure(player.error);
+                    if (isPlayerVisible()) handleVideoLoadFailure(player.error);
                 });
 
                 source.addEventListener('error', () => {
-                    handleVideoLoadFailure(player.error || { code: 4, message: 'Resource blocked by browser, not found (404), or network failure.' });
+                    if (isPlayerVisible()) {
+                        handleVideoLoadFailure(player.error || { code: 4, message: 'Resource blocked by browser, not found (404), or network failure.' });
+                    }
                 });
             }
         }
@@ -505,7 +565,7 @@
 
         function retryActiveVideo() {
             if (activeVideoAttempt) {
-                playVideoByPath(activeVideoAttempt.path, true);
+                loadAndStreamVideo(activeVideoAttempt, true);
             }
         }
 
@@ -522,7 +582,7 @@
             // 1. Core Chapters
             if (chapterList) {
                 chapterList.innerHTML = coreChapters.map(item => `
-                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                    <div id="item-${item.id}" onclick="handleAssetSelected('${item.path.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                         <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                             <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-yellow-500 border border-gray-800 flex-shrink-0">
                                 <i class="fa-solid fa-play text-xs"></i>
@@ -542,7 +602,7 @@
             // 2. Documentaries
             if (documentaryList) {
                 documentaryList.innerHTML = documentaries.map(item => `
-                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                    <div id="item-${item.id}" onclick="handleAssetSelected('${item.path.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                         <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                             <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-blue-400 border border-gray-800 flex-shrink-0">
                                 <i class="fa-solid fa-film text-xs"></i>
@@ -562,7 +622,7 @@
             // 3. Book App Chapters
             if (bookAppList) {
                 bookAppList.innerHTML = bookAppChapters.map(item => `
-                    <div id="item-${item.id}" onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                    <div id="item-${item.id}" onclick="handleAssetSelected('${item.path.replace(/'/g, "\\'")}')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                         <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                             <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0">
                                 <i class="fa-solid fa-book-open text-xs"></i>
@@ -609,7 +669,7 @@
                         </td>
                         <td class="p-3 text-slate-400 font-mono text-[11px]">${item.prompt}</td>
                         <td class="p-3 text-right whitespace-nowrap">
-                            <button onclick="playVideoByPath('${item.path.replace(/'/g, "\\'")}', true)" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition" title="Play Video in Player">
+                            <button onclick="handlePlayFromDirectory('${item.path.replace(/'/g, "\\'")}')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition" title="Play Video">
                                 <i class="fa-solid fa-play mr-1"></i> Play
                             </button>
                             <button onclick="copyRawPath(event, '${item.path.replace(/'/g, "\\'")}')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition" title="Copy Full URL">
@@ -621,20 +681,31 @@
             }).join('');
         }
 
+        // Clicking an asset updates metadata and active link, only loading MP4 if player is already visible
+        function handleAssetSelected(path) {
+            playVideoByPath(path, isPlayerVisible());
+        }
+
+        // Clicking 'Play' explicitly unhides the player and begins video playback
+        function handlePlayFromDirectory(path) {
+            revealPlayer();
+            playVideoByPath(path, true);
+        }
+
+        // Resolves video object, updates link UI, dispatches sync to Abe, and conditionally streams MP4
         function playVideoByPath(path, triggerAutoPlay = false) {
             const rawDecoded = decodeURIComponent(path.replace(/^\/video\//, '').replace(/^\.\//, ''));
             const video = allMappedVideos.find(v => decodeURIComponent(v.path) === rawDecoded || v.path === path);
             
             if (!video) {
                 console.warn('Requested video not found:', path);
-                handleVideoLoadFailure({ code: 4, message: `Video "${path}" is not registered in video registry.` });
                 return;
             }
 
             activeVideoAttempt = video;
             dismissErrorCover();
 
-            // Clear previous highlight
+            // Highlight active playlist item
             document.querySelectorAll('[id^="item-"]').forEach(el => {
                 el.style.borderColor = '#1f2937';
                 el.style.backgroundColor = '#111827';
@@ -651,54 +722,69 @@
                 activeCard.style.backgroundColor = '#1f2937';
             }
 
+            // ALWAYS update the banner link so it can be copied immediately
             const encodedPath = encodeURI(decodeURI(video.path));
             const absoluteUrl = getBaseFolderUrl() + encodedPath;
 
-            // Update top link info bar regardless of player visibility
             const titleElem = document.getElementById('loadedTitle');
             const pathElem = document.getElementById('loadedPath');
             if (titleElem) titleElem.innerText = video.label;
             if (pathElem) pathElem.innerText = absoluteUrl;
 
+            // ALWAYS dispatch prompt sync to Abe (regardless of whether player is visible or hidden)
+            dispatchPromptSync(video);
+
+            // ONLY load the MP4 over the network if the player is currently unhidden
+            if (isPlayerVisible()) {
+                loadAndStreamVideo(video, triggerAutoPlay);
+            } else {
+                // Keep player element completely detached from MP4 network streams
+                haltVideoPlayer();
+                const statusPing = document.getElementById('videoStatusIndicator');
+                if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-yellow-500 rounded-full flex-shrink-0';
+            }
+        }
+
+        // Executes actual MP4 loading on the video tag
+        function loadAndStreamVideo(video, triggerAutoPlay = false) {
             const player = document.getElementById('courseVideoPlayer');
             const source = document.getElementById('videoSource');
             const cover = document.getElementById('playerLoadingCover');
             const statusPing = document.getElementById('videoStatusIndicator');
 
-            if (player && source) {
-                player.pause();
-                if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-yellow-500 rounded-full animate-ping flex-shrink-0';
-                if (cover) {
-                    document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
-                    cover.classList.remove('hidden');
-                }
+            if (!player || !source) return;
 
-                if (activeLoadTimer) clearTimeout(activeLoadTimer);
-                activeLoadTimer = setTimeout(() => {
-                    if (player.readyState < 2) {
-                        handleVideoLoadFailure({ 
-                            code: 2, 
-                            message: `Connection timed out loading "${video.path}". Ensure the file exists and is served over HTTPS.` 
-                        });
-                    }
-                }, 10000);
+            const encodedPath = encodeURI(decodeURI(video.path));
 
-                source.src = encodedPath;
-                player.load();
-
-                if (triggerAutoPlay) {
-                    const playPromise = player.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(err => {
-                            console.log('Autoplay deferred or blocked by browser policy:', err);
-                            if (cover) cover.classList.add('hidden');
-                        });
-                    }
-                }
+            player.pause();
+            if (statusPing) statusPing.className = 'w-2.5 h-2.5 bg-yellow-500 rounded-full animate-ping flex-shrink-0';
+            if (cover) {
+                document.getElementById('loadingMessage').innerText = `Loading "${video.label}"...`;
+                cover.classList.remove('hidden');
             }
 
-            // Always notify external parents (Abe) regardless of player state
-            dispatchPromptSync(video);
+            if (activeLoadTimer) clearTimeout(activeLoadTimer);
+            activeLoadTimer = setTimeout(() => {
+                if (player.readyState < 2) {
+                    handleVideoLoadFailure({ 
+                        code: 2, 
+                        message: `Connection timed out loading "${video.path}". Ensure the file exists and is served over HTTPS.` 
+                    });
+                }
+            }, 10000);
+
+            source.src = encodedPath;
+            player.load();
+
+            if (triggerAutoPlay) {
+                const playPromise = player.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.log('Autoplay deferred or blocked by browser policy:', err);
+                        if (cover) cover.classList.add('hidden');
+                    });
+                }
+            }
         }
 
         function handleVideoStarted() {
@@ -715,6 +801,7 @@
             }
         }
 
+        // Cross-window sync to Abe via postMessage
         function dispatchPromptSync(videoObj) {
             if (window.parent && window.parent !== window) {
                 const encodedPath = encodeURI(decodeURI(videoObj.path));
