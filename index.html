@@ -57,7 +57,7 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
 
-        <!-- ACTIVE LINK STATUS BANNER: Computes immediately via inline script -->
+        <!-- ACTIVE LINK STATUS BANNER -->
         <div class="bg-gray-900 px-4 py-3 rounded-xl border border-gray-800 flex flex-col sm:flex-row gap-3 sm:items-center justify-between text-xs shadow-lg">
             <div class="flex items-center space-x-2">
                 <span id="videoStatusIndicator" class="w-2.5 h-2.5 bg-emerald-500 rounded-full flex-shrink-0"></span>
@@ -75,7 +75,7 @@
         <!-- Top Split View: Video Streamer & Playlists -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-            <!-- Video Player (Hidden by default; No video tag exists until explicitly clicked) -->
+            <!-- Video Player (Hidden by default) -->
             <section id="playerSection" class="lg:col-span-7 flex flex-col gap-4 hidden">
                 <div class="bg-black rounded-xl overflow-hidden border border-gray-800 shadow-2xl relative flex flex-col">
                     <div id="videoMountContainer" class="relative bg-black flex items-center justify-center" style="min-height: 280px; aspect-ratio: 16/9;">
@@ -86,7 +86,7 @@
                 </div>
             </section>
 
-            <!-- Categorized Playlists (100% Pre-rendered in HTML so they NEVER fail to show) -->
+            <!-- Categorized Playlists (Static HTML) -->
             <section id="sidebarSection" class="lg:col-span-12 flex flex-col space-y-5">
                 
                 <!-- Category 1: Core History -->
@@ -256,12 +256,12 @@
                             <button onclick="copyExplicitPath(event, 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
                         </div>
 
-                        <div id="card-chap6" onclick="selectVideo('Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4', 'Publish')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
+                        <div id="card-chap6" onclick="selectVideo('KDP%20Export%20%26%20Publishing%20Guide.mp4', 'Publish')" class="flex justify-between items-center p-2.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-lg cursor-pointer transition">
                             <div class="flex items-center space-x-3 text-left overflow-hidden mr-2">
                                 <div class="w-6 h-6 rounded bg-black flex items-center justify-center text-xs text-green-400 border border-gray-800 flex-shrink-0"><i class="fa-solid fa-book-open text-xs"></i></div>
-                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Publish</p><p class="text-[10px] text-slate-500 font-mono truncate">Day 10 - KDP Export & Publishing Guide.mp4</p></div>
+                                <div class="overflow-hidden"><p class="text-xs font-serif font-semibold text-slate-200 truncate">Publish</p><p class="text-[10px] text-slate-500 font-mono truncate">KDP Export & Publishing Guide.mp4</p></div>
                             </div>
-                            <button onclick="copyExplicitPath(event, 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
+                            <button onclick="copyExplicitPath(event, 'KDP%20Export%20%26%20Publishing%20Guide.mp4')" class="text-slate-500 hover:text-emerald-400 p-1 text-xs flex-shrink-0" title="Copy URL"><i class="fa-regular fa-copy"></i></button>
                         </div>
 
                     </div>
@@ -270,7 +270,7 @@
             </section>
         </div>
 
-        <!-- MASTER DIRECTORY TABLE: 100% Pre-rendered in HTML -->
+        <!-- MASTER DIRECTORY TABLE -->
         <section class="bg-custom-card rounded-xl p-5 border border-gray-800">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 mb-4 border-b border-gray-800 gap-2">
                 <div>
@@ -333,7 +333,7 @@
 
                         <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">End Matters</td><td class="p-3 text-emerald-400 truncate max-w-xs">TenDayBook Masterclass - Chapter 5_ End Matters.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">TenDayBook Masterclass - Chapter 5: End Matters</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4', 'End Matters')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'TenDayBook%20Masterclass%20-%20Chapter%205_%20End%20Matters.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
 
-                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Publish</td><td class="p-3 text-emerald-400 truncate max-w-xs">Day 10 - KDP Export & Publishing Guide.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">Day 10 - KDP Export & Publishing Guide</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4', 'Publish')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'Day%2010%20-%20KDP%20Export%20%26%20Publishing%20Guide.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
+                        <tr class="hover:bg-gray-900/60 transition"><td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] border bg-green-900 text-green-300 border-green-700">TenDayBook</span></td><td class="p-3 font-semibold text-slate-200">Publish</td><td class="p-3 text-emerald-400 truncate max-w-xs">KDP Export & Publishing Guide.mp4</td><td class="p-3 text-slate-400 font-mono text-[11px]">KDP Export & Publishing Guide</td><td class="p-3 text-right whitespace-nowrap"><button onclick="playExplicitVideo('KDP%20Export%20%26%20Publishing%20Guide.mp4', 'Publish')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-yellow-400 rounded text-[11px] mr-1.5 transition"><i class="fa-solid fa-play mr-1"></i> Play</button><button onclick="copyExplicitPath(event, 'KDP%20Export%20%26%20Publishing%20Guide.mp4')" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-emerald-400 rounded text-[11px] transition"><i class="fa-regular fa-copy mr-1"></i> Copy URL</button></td></tr>
 
                     </tbody>
                 </table>
@@ -347,7 +347,7 @@
         <i class="fa-solid fa-check mr-2"></i> Direct path copied to clipboard!
     </div>
 
-    <!-- CLEAN, FOOLPROOF JAVASCRIPT CONTROLLER -->
+    <!-- JAVASCRIPT CONTROLLER -->
     <script>
         var currentActivePath = 'introduction.mp4';
 
